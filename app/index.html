@@ -1,0 +1,152 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+  </head>
+  <body ng-app="ddtApp" ng-controller="ApplicationController"  layout="row">
+    <!--[if lte IE 8]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <!-- Add your site or application content here -->
+    <md-sidenav layout="column" class="md-sidenav-left md-whiteframe-z2" md-component-id="left">
+      <md-toolbar class="md-tall md-hue-2">
+        <div layout="column">
+          <span flex></span>
+          <br>
+          <md-icon ng-if = "currentUser" md-svg-icon="images/icon/account_circle.svg"></md-icon>
+          <md-icon ng-if = "currentUser == null" md-svg-icon="images/icon/account_off.svg"></md-icon>
+          <div ng-if = "currentUser" layout = "row" layout-align = "center center"><h4>{{currentUser.id}}</h4></div>
+          <div ng-if = "currentUser" layout = "row" layout-align = "center center"><h4>You are an {{currentUser.role}}.</h4></div>
+          <div ng-if = "currentUser == null" layout = "row" layout-align = "center center"><h4>Welcome! please login.</h4></div>
+        </div>
+      </md-toolbar>
+      <md-list>
+        <md-item ng-repeat="item in menu">
+          <a>
+            <md-item-content md-ink-ripple layout="row" layout-align="start center">
+              <div class="inset">
+                <md-icon md-svg-src="{{item.icon}}"></md-icon>
+              </div>
+              <div class="inset" ng-click= "doDirectPage(item.title)">{{item.title}}</div>
+            </md-item-content>
+          </a>
+        </md-item>
+        <md-divider></md-divider>
+        <md-subheader ng-show = "currentUser.role === 'Admin'">Admin Menu</md-subheader>
+        <md-item ng-show = "currentUser.role === 'Admin'" ng-repeat="item in admin">
+          <a>
+            <md-item-content md-ink-ripple layout="row" layout-align="start center">
+              <div class="inset">
+                <ng-md-icon icon="item.icon"></ng-md-icon>
+              </div>
+              <div class="inset" ng-click= "doDirectPage(item.title)">{{item.title}}</div>
+            </md-item-content>
+          </a>
+        </md-item>
+      </md-list>
+      <br>
+      <br>
+      <md-button ng-click="close()" class="md-primary">
+           Close Side Menu
+      </md-button>
+    </md-sidenav>
+
+
+
+    <div layout="column" flex>
+    <md-toolbar>
+      <div class="md-toolbar-tools" layout="row">
+        <md-button class="md-icon-button" ng-click="toggleSidenav('left')" aria-label="Menu">
+          <md-icon md-svg-icon="images/icon/menu.svg"></md-icon>
+        </md-button>
+        <h2>
+          <span>Data Discovery Tool Demo</span>
+        </h2>
+        <span flex></span>
+
+        <!-- <div layout="column">
+          <div ng-if="currentUser">Welcome, {{ currentUser.id }}</div>
+          <div ng-switch on="currentUser.role">
+            <div ng-switch-when="userRoles.admin">You're admin.</div>
+            <div ng-switch-default></div>
+          </div>
+        </div> -->
+
+        <md-button class="md-icon-button" aria-label="help">
+            <md-icon ng-if = "currentUser" md-svg-icon="images/icon/help.svg" ng-click = "doGetHelp()"></md-icon>
+        </md-button>
+
+        <md-button class="md-icon-button" aria-label="logout">
+            <md-icon ng-if = "currentUser" md-svg-icon="images/icon/logout.svg" ng-click = "doLogout()"></md-icon>
+            <md-icon ng-if = "currentUser == null " md-svg-icon="images/icon/account_off.svg" ng-click = "doDirectLogin()"></md-icon>
+        </md-button>
+
+      </div>
+    </md-toolbar>
+
+    <md-content flex>
+      <div ui-view=""></div>
+    </md-content>
+
+    <div class="footer">
+      <div class="container">
+        <p><span class="glyphicon glyphicon-heart"></span> from the MAP team</p>
+      </div>
+    </div>
+</div>
+
+
+
+
+
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
+
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/angular-aria/angular-aria.js"></script>
+    <script src="bower_components/angular-cookies/angular-cookies.js"></script>
+    <script src="bower_components/angular-messages/angular-messages.js"></script>
+    <script src="bower_components/angular-resource/angular-resource.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="bower_components/angular-touch/angular-touch.js"></script>
+    <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+    <script src="bower_components/angular-material/angular-material.js"></script>
+    <script src="bower_components/ng-idle/angular-idle.js"></script>
+    <script src="bower_components/spin.js/spin.js"></script>
+    <script src="bower_components/angular-spinner/angular-spinner.js"></script>
+    <script src="bower_components/angular-file-upload/dist/angular-file-upload.min.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+        <!-- build:js({.tmp,app}) scripts/scripts.js -->
+        <script src="scripts/app.js"></script>
+        <script src="scripts/controllers/login.js"></script>
+        <script src="scripts/controllers/query_builder.js"></script>
+        <script src="scripts/controllers/pattern_builder.js"></script>
+        <script src="scripts/controllers/query_status.js"></script>
+        <script src="scripts/controllers/user_profile.js"></script>
+        <script src="scripts/controllers/metadata_importing.js"></script>
+        <script src="scripts/controllers/dataset_importing.js"></script>
+        <script src="scripts/controllers/help.js"></script>
+        <!-- endbuild -->
+</body>
+</html>

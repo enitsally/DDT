@@ -1,0 +1,25 @@
+<md-content layout layout-align="center center">
+  <div flex="25"></div>
+  <form flex="50">
+    <md-card>
+      <md-card-content layout="column" layout-align="center center">
+        <md-input-container>
+          <label>User name</label>
+          <input ng-model="credentials.username">
+        </md-input-container>
+        <md-input-container>
+          <label>Password</label>
+          <input ng-model="credentials.password">
+        </md-input-container>
+      </md-card-content>
+
+      <div class="md-actions" layout="row" layout-align="center center">
+        <md-button ng-click="doLogin(credentials)">Login</md-button>
+      </div>
+    </md-card>
+      <p class="error"><strong> {{message}}</strong> {{error}}</p>
+
+
+  </form>
+  <div flex="25"></div>
+</md-content>
