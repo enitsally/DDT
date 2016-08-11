@@ -3,7 +3,7 @@
 
 angular.module('ddtApp')
   .controller('datasetImportingCtrl', function ($scope, $http, $state, $mdDialog, $mdToast, FileUploader) {
-
+    $scope.msg_temp = "Test";
     $scope.exp_files = {
       exp_user : $scope.currentUser ? $scope.currentUser.id : '',
       program : '',
@@ -60,8 +60,17 @@ angular.module('ddtApp')
 
 
     $scope.uploader = new FileUploader({
-      url:'http://localhost:5000/uploadConnJsonFile',
+      url:'http://localhost:5000/checkConnJsonFile',
       queueLimit: 20
+    });
+
+    $scope.uploader.filters.push({
+      name:'jsonFilter',
+      fn: function(item, options){
+        var name = item.name.split(".")[0]
+        var type = item.name.split(".")[1];
+        return 'json'=== type;
+      }
     });
 
     $scope.add_uploader = new FileUploader({
@@ -70,21 +79,40 @@ angular.module('ddtApp')
     });
 
     $scope.uploader.onBeforeUploadItem = function(item) {
-      item.formData.push({descr: $scope.file_user_id[item.index-1]});
+      item.formData.push({file_user_id: $scope.file_user_id[item.index-1]});
+      // console.log($scope.file_user_id[item.index-1]);
+      // if ( $scope.file_user_id[item.index-1] === undefined){
+      //     $mdDialog.show(
+      //       $mdDialog.alert()
+      //         .parent(angular.element(document.querySelector('#popupContainer')))
+      //         .clickOutsideToClose(true)
+      //         .title('This is an alert title')
+      //         .textContent('You have to enter the ID number.')
+      //         .ariaLabel('Alert Dialog')
+      //         .ok('Got it!')
+      //         .targetEvent(ev)
+      //     );
+      //
+      // };
     };
 
     $scope.add_uploader.onBeforeUploadItem = function(item) {
-      item.formData.push({descr: $scope.add_file_user_id[item.index-1]});
+      item.formData.push({file_user_id: $scope.add_file_user_id[item.index-1]});
     };
 
     $scope.uploader.onSuccessItem  = function(item, response){
-      var tmp  = {
-        file_name: response.status.file_name,
-        file_id : response.status.file_id,
-        file_size : (parseFloat(item.file.size / 1024.00 / 1024.00).toFixed(2)) + 'MB',
-        file_user_id : item.formData[0].descr
-      };
-      $scope.file_log.push(tmp);
+      item.formData.push({format:response.status.format, conn: response.status.conn});
+      if (response.status.format === true && response.status.conn === true){
+        var tmp  = {
+          file_name: response.status.file_name,
+          file_id : response.status.file_id,
+          file_size : (parseFloat(item.file.size / 1024.00 / 1024.00).toFixed(2)) + 'MB',
+          file_user_id : item.formData[0].file_user_id,
+
+        };
+        $scope.file_log.push(tmp);
+      } ;
+
     };
 
     $scope.add_uploader.onSuccessItem  = function(item, response){
@@ -92,12 +120,13 @@ angular.module('ddtApp')
         file_name: response.status.file_name,
         file_id : response.status.file_id,
         file_size : (parseFloat(item.file.size / 1024.00 / 1024.00).toFixed(2)) + 'MB',
-        file_user_id : item.formData[0].descr
+        file_user_id : item.formData[0].file_user_id
       };
       $scope.add_file_log.push(tmp);
     };
 
     $scope.uploader.onCompleteAll = function (item, response, status, headers){
+
       var confirm = $mdDialog.confirm()
           .title('Would you like to confirm your upload')
           .ariaLabel('Confirm Dialog')

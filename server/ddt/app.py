@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, session, render_template, redirect
 from flask.ext.cors import CORS, cross_origin
 from MongodbBatch import mongodbbatch
+from DBFactory import Connector
 import json
 import os
 import pymongo
@@ -16,9 +17,11 @@ USER_COLLECTION_NAME = 'sys_users'
 app = Flask(__name__, static_url_path='')
 app.secret_key = 'ddt key'
 
+# MongdoDB instance for connection and operations
 obj = mongodbbatch(host="172.18.60.20", port="27017", db="DDDB")
 
 CORS(app)
+
 
 @app.route('/')
 def root():
@@ -32,7 +35,7 @@ def login():
   var_username = input_data['username']
   var_password = input_data['password']
   login_status = obj.get_login(USER_COLLECTION_NAME, var_username, var_password)
-  user_map = {'A': 'Admin', 'U':'User'}
+  user_map = {'A': 'Admin', 'U': 'User'}
 
   if login_status is None:
     status = False
@@ -47,25 +50,40 @@ def login():
   return jsonify(
     {'status': status, 'role': login_status, 'msg': message, 'user': {'id': var_username, 'role': login_status}})
 
+
 @app.route('/logout')
 def logout():
-    logging.info('API: /logout, method: logout()')
-    session.pop('logged_in', None)
-    status = "You are logged out."
-    return jsonify({'status': status})
+  logging.info('API: /logout, method: logout()')
+  session.pop('logged_in', None)
+  status = "You are logged out."
+  return jsonify({'status': status})
 
-@app.route('/uploadConnJsonFile', methods=['GET', 'POST'])
-def uploadConnJsonFile():
-    logging.info('API: /uploadConnJsonFile, method: uploadConnJsonFile()')
-    if request.method == 'POST':
-      file = request.files['file']
+
+@app.route('/checkConnJsonFile', methods=['GET', 'POST'])
+def checkConnJsonFile():
+  logging.info('API: /checkConnJsonFile, method: checkConnJsonFile()')
+  if request.method == 'POST':
+    file = request.files['file']
+
+    file_name = file.filename
+    if file_name.split('.')[1] == 'json':
+      json_content = json.load(file)
+      format_status = True
+
+      if len(json_content) == 1:
+        key = json_content.keys()[0]
+        db = Connector(json_content.get(key))
+        conn = db.get_connection()
+        conn_status = False if conn is None else True
+    else:
+      format_status = False
+      conn_status = False
+
+    if format_status & conn_status :
       file_id = obj.upload_temp(file)
-      result = {
-        'file_name': file.filename,
-        'file_id': str(file_id)
-      }
 
-      return jsonify({'status': result})
+    return jsonify({'status': {'format': format_status, 'conn': conn_status, 'file_name': file_name, 'file_id': str(file_id)}})
+
 
 if __name__ == "__main__":
   # logging.config.fileConfig('logging.conf')

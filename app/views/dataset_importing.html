@@ -219,10 +219,13 @@
           <div layout = "row">
           <md-card flex = "20">
             <md-card-content layout="column">
-                <h3>Select files</h3>
+                <h3>Select files</h3> (Only JSON files are accepted)
+                <div>
+                </div>
+                <br/>
                 <div ng-show="uploader.isHTML5">
                     <div nv-file-drop="" uploader="uploader">
-                      <div class="well my-drop-zone" nv-file-over="" uploader="uploader">
+                      <div class="well my-drop-zone" nv-file-over="" uploader="uploader" filters="jsonFilter">
                         Files drop zone
                       </div>
                     </div>
@@ -230,7 +233,7 @@
                 <br/>
                 <div class="col-md-3" flex>
                   Multiple
-                  <input type="file" nv-file-select="" uploader="uploader" multiple /><br/>
+                  <input type="file" nv-file-select="" filters="jsonFilter" uploader="uploader" multiple /><br/>
                 </div>
             </md-card-content>
           </md-card>
@@ -253,15 +256,23 @@
                   <tbody>
                     <tr ng-repeat="item in uploader.queue">
                       <td><strong>{{ item.file.name }}</strong></td>
-                      <td ng-show="uploader.isHTML5" nowrap>{{ item.file.size/1024/1024|number:2 }} MB</td>
+                      <td ng-show="uploader.isHTML5" nowrap>{{ item.file.size/1024|number:2 }} B</td>
                       <td ng-show="uploader.isHTML5">
                         <div class="progress" style="margin-bottom: 0;">
                           <div class="progress-bar" role="progressbar" ng-style="{ 'width': item.progress + '%' }"></div>
                         </div>
                       </td>
-                      <td class="text-center">
+                      <td class="text-center" nowrap>
+                        Check
                         <span ng-show="item.isSuccess"><i class="glyphicon glyphicon-ok"></i></span>
                         <span ng-show="item.isError"><i class="glyphicon glyphicon-remove"></i></span>
+                        | Format
+                        <span ng-show="item.formData[1].format"><i class="glyphicon glyphicon-ok"></i></span>
+                        <span ng-show="item.formData[1].format==false"><i class="glyphicon glyphicon-remove"></i></span>
+                        | Conn
+                        <span ng-show="item.formData[1].conn"><i class="glyphicon glyphicon-ok"></i></span>
+                        <span ng-show="item.formData[1].conn==false"><i class="glyphicon glyphicon-remove"></i></span>
+
                       </td>
                       <td nowrap>
                         <!-- <button type="button" class="btn btn-success btn-xs" ng-click="item.upload()" ng-disabled="item.isReady || item.isUploading || item.isSuccess">
@@ -274,6 +285,7 @@
                       <td nowrap>
                         <label>ID</label>
                         <input ng-model="file_user_id[$index]">
+                        <label style ="color : red">*</label>
                       </td>
                     </tr>
                   </tbody>
@@ -286,11 +298,14 @@
                     </div>
                   </div>
                   <button type="button" class="btn btn-success btn-s" ng-click="uploader.uploadAll()" ng-disabled="!uploader.getNotUploadedItems().length">
-                    <span class="glyphicon glyphicon-upload"></span> Upload all
+                    <span class="glyphicon glyphicon-play-circle"></span> Check all
                   </button>
                   <button type="button" class="btn btn-danger btn-s" ng-click="clearAll()" ng-disabled="!uploader.queue.length">
                     <span class="glyphicon glyphicon-trash"></span> Remove all
                   </button>
+                </div>
+                <div>
+                  msg_temp:  {{msg_temp}}
                 </div>
               </div>
             </md-card-content>

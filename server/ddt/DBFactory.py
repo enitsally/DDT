@@ -22,25 +22,19 @@ class Connector:
             try:
                 engine = create_engine('mssql+pyodbc:///?odbc_connect={}'.format(params))
                 conn = engine.connect()
+                return conn
             except exc.DBAPIError as err:
-                if err.connection_invalidated:
-                    logging.error("Invalidated connection:{}".format(self.dialect))
-                else:
-                    raise
+                logging.error("Invalidated connection:{}".format(err.message))
 
-            return conn
         elif self.dialect == 'redshift':
             odbc_connection = "{}://{}:{}@{}:{}/{}".format(self.driver, self.uid, self.upw, self.host, self.port, self.db)
             try:
                 engine = create_engine(odbc_connection)
                 conn = engine.connect()
+                return conn
             except exc.DBAPIError as err:
-                if err.connection_invalidated:
-                    logging.error("Invalidated connection:{}".format(self.dialect))
-                else:
-                    raise
+                logging.error("Invalidated connection:{}".format(err.message))
 
-            return conn
         else:
             logging.error("No connection dialect is matched in the system, for dialect '{}'".format(self.dialect))
 
