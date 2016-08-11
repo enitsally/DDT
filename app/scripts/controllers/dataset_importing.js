@@ -3,7 +3,6 @@
 
 angular.module('ddtApp')
   .controller('datasetImportingCtrl', function ($scope, $http, $state, $mdDialog, $mdToast, FileUploader) {
-    $scope.msg_temp = "Test";
     $scope.exp_files = {
       exp_user : $scope.currentUser ? $scope.currentUser.id : '',
       program : '',
@@ -78,37 +77,26 @@ angular.module('ddtApp')
       queueLimit: 20
     });
 
-    $scope.uploader.onBeforeUploadItem = function(item) {
-      item.formData.push({file_user_id: $scope.file_user_id[item.index-1]});
-      // console.log($scope.file_user_id[item.index-1]);
-      // if ( $scope.file_user_id[item.index-1] === undefined){
-      //     $mdDialog.show(
-      //       $mdDialog.alert()
-      //         .parent(angular.element(document.querySelector('#popupContainer')))
-      //         .clickOutsideToClose(true)
-      //         .title('This is an alert title')
-      //         .textContent('You have to enter the ID number.')
-      //         .ariaLabel('Alert Dialog')
-      //         .ok('Got it!')
-      //         .targetEvent(ev)
-      //     );
-      //
-      // };
-    };
+    // $scope.uploader.onBeforeUploadItem = function(item) {
+    //   item.formData.push({file_user_id: $scope.file_user_id[item.index-1]});
+    //   console.log($scope.file_user_id[item.index-1]);
+    //   if ($scope.file_user_id[item.index-1] === undefined){
+    //       $scope.uploader.cancelItem(item);
+    //   }
+    // };
 
     $scope.add_uploader.onBeforeUploadItem = function(item) {
       item.formData.push({file_user_id: $scope.add_file_user_id[item.index-1]});
     };
 
     $scope.uploader.onSuccessItem  = function(item, response){
-      item.formData.push({format:response.status.format, conn: response.status.conn});
+      item.formData.push({format:response.status.format, conn: response.status.conn, msg: response.status.error_msg, conn_key: response.status.conn_key});
       if (response.status.format === true && response.status.conn === true){
         var tmp  = {
           file_name: response.status.file_name,
           file_id : response.status.file_id,
-          file_size : (parseFloat(item.file.size / 1024.00 / 1024.00).toFixed(2)) + 'MB',
-          file_user_id : item.formData[0].file_user_id,
-
+          file_size : item.file.size,
+          conn_key : response.status.conn_key
         };
         $scope.file_log.push(tmp);
       } ;
@@ -119,7 +107,7 @@ angular.module('ddtApp')
       var tmp  = {
         file_name: response.status.file_name,
         file_id : response.status.file_id,
-        file_size : (parseFloat(item.file.size / 1024.00 / 1024.00).toFixed(2)) + 'MB',
+        file_size : item.file.size,
         file_user_id : item.formData[0].file_user_id
       };
       $scope.add_file_log.push(tmp);
@@ -127,36 +115,37 @@ angular.module('ddtApp')
 
     $scope.uploader.onCompleteAll = function (item, response, status, headers){
 
-      var confirm = $mdDialog.confirm()
-          .title('Would you like to confirm your upload')
-          .ariaLabel('Confirm Dialog')
-          .ok('Confirm')
-          .cancel('Cancel');
-      $mdDialog.show(confirm).then(function() {
-        //Confirm Upload
-        $scope.exp_files.files = [];
-        for (var i = 0; i < $scope.file_log.length; i ++){
-          $scope.exp_files.files.push($scope.file_log[i]);
-        }
+      // var confirm = $mdDialog.confirm()
+      //     .title('Would you like to confirm your upload')
+      //     .ariaLabel('Confirm Dialog')
+      //     .ok('Confirm')
+      //     .cancel('Cancel');
+      // $mdDialog.show(confirm).then(function() {
+      //   //Confirm Upload
+      //   $scope.exp_files.files = [];
+      //   for (var i = 0; i < $scope.file_log.length; i ++){
+      //     $scope.exp_files.files.push($scope.file_log[i]);
+      //   }
+      //
+      //   $http.post('/confirm$work$file$upload', $scope.exp_files).then (function (response) {
+      //     var msg = response.data.status;
+      //     $scope.showSimpleToast(msg);
+      //
+      //     $scope.doResetInput();
+      //
+      //   }, function () {
+      //   });
+      //
+      // }, function() {
+      //   //Cancal Upload
+      //
+      //   $http.post('/cancel$work$file$upload', $scope.file_log).then (function (response) {
+      //     var msg = response.data.status;
+      //     $scope.showSimpleToast(msg);
+      //   }, function () {
+      //   });
+      // });
 
-        $http.post('/confirm$work$file$upload', $scope.exp_files).then (function (response) {
-          var msg = response.data.status;
-          $scope.showSimpleToast(msg);
-
-          $scope.doResetInput();
-
-        }, function () {
-        });
-
-      }, function() {
-        //Cancal Upload
-
-        $http.post('/cancel$work$file$upload', $scope.file_log).then (function (response) {
-          var msg = response.data.status;
-          $scope.showSimpleToast(msg);
-        }, function () {
-        });
-      });
     };
 
     $scope.add_uploader.onCompleteAll = function (item, response, status, headers){
@@ -195,13 +184,11 @@ angular.module('ddtApp')
 
     $scope.clearAll = function(){
       $scope.uploader.clearQueue();
-      $scope.file_user_id = [];
       $scope.file_log = [];
     };
 
     $scope.add_clearAll = function(){
       $scope.add_uploader.clearQueue();
-      $scope.add_file_user_id = [];
       $scope.add_file_log = [];
     };
 
@@ -285,9 +272,10 @@ angular.module('ddtApp')
       });
 
     };
-    $scope.doSaveWorkFile = function(){
+    $scope.doSaveDataSet = function(){
+      //import json tab
       if ($scope.selectedIndex === 1){
-        $http.post('/save$sub$work$file$del', $scope.delsubExpList).then(function(response){
+        $http.post('http://localhost:5000/saveConnJsonFile', $scope.file_log).then(function(response){
             var msg = response.data.status;
             originalsubExpList = [];
             $scope.showFlag = true;
@@ -387,5 +375,18 @@ angular.module('ddtApp')
 
     $scope.showSimpleToast = function(showmgs) {
       $mdToast.show($mdToast.simple().content(showmgs).position('bottom right').hideDelay(1000));
+    };
+
+    $scope.showAlert = function(msg) {
+   // Appending dialog to document.body to cover sidenav in docs app
+   // Modal dialogs should fully cover application
+   // to prevent interaction outside of dialog
+       $mdDialog.show(
+         $mdDialog.alert()
+           .parent(angular.element(document.querySelector('#popupContainer')))
+           .clickOutsideToClose(true)
+           .textContent(msg)
+           .ok('Got it!')
+       );
     };
 });

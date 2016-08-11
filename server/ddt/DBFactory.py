@@ -14,7 +14,7 @@ class Connector:
         self.db = conn_info.get('db')
 
     def get_connection(self):
-
+        error_msg = ''
         # Connection for Netezza using SQLalchemy
         if self.dialect == 'netezza':
             odbc_connection = "DRIVER={" + self.driver + "}; SERVER=" + self.host + "; PORT=" + self.port + "; DATABASE=" + self.db + "; UID=" + self.uid + "; PWD=" + self.upw + ";"
@@ -25,7 +25,7 @@ class Connector:
                 return conn
             except exc.DBAPIError as err:
                 logging.error("Invalidated connection:{}".format(err.message))
-
+                error_msg = err.message
         elif self.dialect == 'redshift':
             odbc_connection = "{}://{}:{}@{}:{}/{}".format(self.driver, self.uid, self.upw, self.host, self.port, self.db)
             try:
@@ -34,14 +34,15 @@ class Connector:
                 return conn
             except exc.DBAPIError as err:
                 logging.error("Invalidated connection:{}".format(err.message))
-
+                error_msg = err.message
         else:
             logging.error("No connection dialect is matched in the system, for dialect '{}'".format(self.dialect))
 
-        return None
+        return error_msg
 
     def connection_test(self):
-        if self.get_connection() is not None:
-          return True
+        result = self.get_connection()
+        if type(result) == str:
+          return {'status': False, 'message': result}
         else:
-          return False
+          return {'status': True, 'message': None}

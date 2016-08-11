@@ -60,8 +60,8 @@ def logout():
 
 
 @app.route('/checkConnJsonFile', methods=['GET', 'POST'])
-def checkConnJsonFile():
-  logging.info('API: /checkConnJsonFile, method: checkConnJsonFile()')
+def checkconnjsonfile():
+  logging.info('API: /checkConnJsonFile, method: checkconnjsonfile()')
   if request.method == 'POST':
     file = request.files['file']
 
@@ -73,17 +73,31 @@ def checkConnJsonFile():
       if len(json_content) == 1:
         key = json_content.keys()[0]
         db = Connector(json_content.get(key))
-        conn = db.get_connection()
-        conn_status = False if conn is None else True
+        conn = db.connection_test()
+        conn_status = conn.get('status')
     else:
       format_status = False
       conn_status = False
 
-    if format_status & conn_status :
+    if format_status & conn_status:
       file_id = obj.upload_temp(file)
+    else:
+      file_id = ''
+      key = ''
 
-    return jsonify({'status': {'format': format_status, 'conn': conn_status, 'file_name': file_name, 'file_id': str(file_id)}})
+    return jsonify({'status': {'format': format_status, 'conn': conn_status, 'file_name': file_name,
+                               'file_id': str(file_id), 'error_msg': conn.get('message'), 'conn_key': key}})
 
+@app.route('/saveConnJsonFile', methods=['GET', 'POST'])
+def saveconnjsonfile():
+    logging.info('API: /saveConnJsonFile, method: saveconnjsonfile()')
+    if request.method == 'POST':
+      input_data = json.loads(request.data)
+      for input in input_data:
+        file_name = input['file_name']
+        file_id = input['file_id']
+        file_size = input['file_size']
+        conn_key = input['conn_key']
 
 if __name__ == "__main__":
   # logging.config.fileConfig('logging.conf')

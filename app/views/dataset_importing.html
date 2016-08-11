@@ -267,11 +267,11 @@
                         <span ng-show="item.isSuccess"><i class="glyphicon glyphicon-ok"></i></span>
                         <span ng-show="item.isError"><i class="glyphicon glyphicon-remove"></i></span>
                         | Format
-                        <span ng-show="item.formData[1].format"><i class="glyphicon glyphicon-ok"></i></span>
+                        <span ng-show="item.formData[0].format"><i class="glyphicon glyphicon-ok"></i></span>
                         <span ng-show="item.formData[1].format==false"><i class="glyphicon glyphicon-remove"></i></span>
                         | Conn
-                        <span ng-show="item.formData[1].conn"><i class="glyphicon glyphicon-ok"></i></span>
-                        <span ng-show="item.formData[1].conn==false"><i class="glyphicon glyphicon-remove"></i></span>
+                        <span ng-show="item.formData[0].conn"><i class="glyphicon glyphicon-ok"></i></span>
+                        <span ng-show="item.formData[0].conn==false"><i class="glyphicon glyphicon-info-sign" ng-click="showAlert(item.formData[0].msg)"></i></span>
 
                       </td>
                       <td nowrap>
@@ -283,9 +283,7 @@
                         </button>
                       </td>
                       <td nowrap>
-                        <label>ID</label>
-                        <input ng-model="file_user_id[$index]">
-                        <label style ="color : red">*</label>
+                        <label ng-show="item.formData[0].conn_key">Connection ID: </label> {{item.formData[0].conn_key}}
                       </td>
                     </tr>
                   </tbody>
@@ -303,9 +301,6 @@
                   <button type="button" class="btn btn-danger btn-s" ng-click="clearAll()" ng-disabled="!uploader.queue.length">
                     <span class="glyphicon glyphicon-trash"></span> Remove all
                   </button>
-                </div>
-                <div>
-                  msg_temp:  {{msg_temp}}
                 </div>
               </div>
             </md-card-content>

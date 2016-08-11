@@ -83,6 +83,45 @@ class mongodbbatch:
                     except pymongo.errors.OperationFailure as e:
                         logging.error("Error Code {}: {}".format(e.code, e.details.get('errmsg')))
 
+    def save_connection_json(self, connection_collection_name, json_file_id, file_name, file_size, conn_key):
+        fs = gridfs.GridFS(self.db)
+        file_content = fs.get(json_file_id)
+        json_data = json.load(file_content)
+        timestamp = datetime.now()
+        if connection_collection_name in self.db.collection_names():
+            logging.warning("Collection '{}' initiation message, collection exits.".format(connection_collection_name))
+        else:
+            logging.warning(
+                "Collection '{}' initiation message, create new collection.".format(connection_collection_name))
+            self.db.create_collection(connection_collection_name)
+
+        json_data['updated_date'] = timestamp
+        json_data['file_name'] = file_name
+        json_data['file_size'] = file_size
+
+        check = self.db[connection_collection_name].find_one({conn_key: {'$exists': True}})
+        try:
+            if check is None:
+                self.db[connection_collection_name].insert(json_data)
+                logging.info("Key '{}' not exists, insert new one.".format(conn_key))
+
+            else:
+
+                json_data[conn_key]['version'] = 1 if check[conn_key].get('version') is None else check[
+                                                                                                      conn_key].get(
+                    'version') + 1
+                self.db[connection_collection_name].find_one_and_replace({conn_key: {'$exists': True}},
+                                                                         json_data)
+                logging.info(
+                    "Key '{}' exists, update record and change updated-date and version.".format(conn_key))
+
+        except pymongo.errors.ConnectionFailure as cf:
+            logging.error("ConnectionFailure:{}".format(cf))
+        except pymongo.errors.DuplicateKeyError as dk:
+            logging.error("DuplicatedKeyError:{}".format(dk))
+        except pymongo.errors.OperationFailure as e:
+            logging.error("Error Code {}: {}".format(e.code, e.details.get('errmsg')))
+
     def import_md_json(self, md_collection_name, connection_collection_name, json_file_path):
 
         if md_collection_name in self.db.collection_names():
