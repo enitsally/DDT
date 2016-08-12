@@ -80,6 +80,7 @@ def checkconnjsonfile():
       conn_status = False
 
     if format_status & conn_status:
+      file.seek(0)
       file_id = obj.upload_temp(file)
     else:
       file_id = ''
@@ -88,16 +89,25 @@ def checkconnjsonfile():
     return jsonify({'status': {'format': format_status, 'conn': conn_status, 'file_name': file_name,
                                'file_id': str(file_id), 'error_msg': conn.get('message'), 'conn_key': key}})
 
+
 @app.route('/saveConnJsonFile', methods=['GET', 'POST'])
 def saveconnjsonfile():
-    logging.info('API: /saveConnJsonFile, method: saveconnjsonfile()')
-    if request.method == 'POST':
-      input_data = json.loads(request.data)
-      for input in input_data:
-        file_name = input['file_name']
-        file_id = input['file_id']
-        file_size = input['file_size']
-        conn_key = input['conn_key']
+  logging.info('API: /saveConnJsonFile, method: saveconnjsonfile()')
+  status = []
+  if request.method == 'POST':
+    input_data = json.loads(request.data)
+    for input in input_data:
+      file_name = input['file_name']
+      file_id = input['file_id']
+      file_size = input['file_size']
+      conn_key = input['conn_key']
+
+      tmp = {'conn_key': conn_key, 'status': obj.save_connection_json(CON_COLLECTION_NAME, file_id, file_name, file_size, conn_key)}
+      status.append(tmp)
+
+  return jsonify({'status': status})
+
+
 
 if __name__ == "__main__":
   # logging.config.fileConfig('logging.conf')

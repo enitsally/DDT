@@ -2,7 +2,7 @@
 
 
 angular.module('ddtApp')
-  .controller('datasetImportingCtrl', function ($scope, $http, $state, $mdDialog, $mdToast, FileUploader) {
+  .controller('datasetImportingCtrl', function ($scope, $http, $state, $mdDialog, $mdToast, $mdMedia,FileUploader) {
     $scope.exp_files = {
       exp_user : $scope.currentUser ? $scope.currentUser.id : '',
       program : '',
@@ -276,17 +276,43 @@ angular.module('ddtApp')
       //import json tab
       if ($scope.selectedIndex === 1){
         $http.post('http://localhost:5000/saveConnJsonFile', $scope.file_log).then(function(response){
-            var msg = response.data.status;
-            originalsubExpList = [];
-            $scope.showFlag = true;
-            $scope.subExpList = [];
-            $scope.onShowPeriodChanged();
-            $scope.showSimpleToast(msg);
-        }, function (){
+            $scope.result_msg = response.data.status;
+            console.log($scope.result_msg);
 
+            var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+            $mdDialog.show({
+                  controller: DialogController,
+                  templateUrl: 'views/dialog.save.status.html',
+                  parent: angular.element(document.body),
+                  clickOutsideToClose:true,
+                  fullscreen: useFullScreen,
+                  locals:{
+                    result: $scope.result_msg
+                  },
+                  scope: $scope,
+                  preserveScope: true
+                });
+
+                function DialogController($scope, $mdDialog, result) {
+                  $scope.save_result = result;
+                  $scope.hide = function() {
+                    $mdDialog.hide();
+                  };
+                  $scope.cancel = function() {
+                    $mdDialog.cancel();
+                  };
+                  $scope.answer = function(answer) {
+                    $mdDialog.hide(answer);
+                  };
+              };
+
+
+          }, function (){
         });
-      }
+      };
     };
+
+
 
     $scope.deleteExp = function(exp_user, exp_no){
 
