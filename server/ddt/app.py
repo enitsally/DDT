@@ -75,10 +75,12 @@ def checkconnjsonfile():
         db = Connector(json_content.get(key))
         conn = db.connection_test()
         conn_status = conn.get('status')
+
+        exist_status = obj.check_connection_exit(CON_COLLECTION_NAME,key)
     else:
       format_status = False
       conn_status = False
-
+      exist_status = False
     if format_status & conn_status:
       file.seek(0)
       file_id = obj.upload_temp(file)
@@ -87,7 +89,7 @@ def checkconnjsonfile():
       key = ''
 
     return jsonify({'status': {'format': format_status, 'conn': conn_status, 'file_name': file_name,
-                               'file_id': str(file_id), 'error_msg': conn.get('message'), 'conn_key': key}})
+                               'file_id': str(file_id), 'error_msg': conn.get('message'), 'conn_key': key, 'key_exist': exist_status}})
 
 
 @app.route('/saveConnJsonFile', methods=['GET', 'POST'])
@@ -101,13 +103,22 @@ def saveconnjsonfile():
       file_id = input['file_id']
       file_size = input['file_size']
       conn_key = input['conn_key']
+      result = obj.save_connection_json(CON_COLLECTION_NAME, file_id, file_name, file_size, conn_key)
 
-      tmp = {'conn_key': conn_key, 'status': obj.save_connection_json(CON_COLLECTION_NAME, file_id, file_name, file_size, conn_key)}
+      tmp = {'conn_key': conn_key, 'status': result.get('status'), 'message': result.get('message')}
       status.append(tmp)
 
   return jsonify({'status': status})
 
-
+@app.route('/getConnectionSummary', methods=['GET', 'POST'])
+def getconnectionsummary():
+  logging.info('API: /getConnectionSummary, method: getconnectionsummary()')
+  input_data = json.loads(request.data)
+  time_range = input_data['time_range']
+  start_time = input_data['start_time']
+  end_time = input_data['end_time']
+  result = obj.get_connection_summary(CON_COLLECTION_NAME,time_range,'','')
+  return jsonify({'status': result})
 
 if __name__ == "__main__":
   # logging.config.fileConfig('logging.conf')

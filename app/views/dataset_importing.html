@@ -16,6 +16,25 @@
         background-color: #ffffff;
     }
 
+    a {
+    position: relative;
+    }
+
+    .popover {
+        text-decoration: none;
+        color: LightGray;
+        position: absolute;
+        left: 100%;
+        top: 0;
+        display: block;
+        padding: 0 20px;
+    }
+
+    .popover span {
+        display: block;
+        font-weight: 200;
+    }
+
 </style>
 
 
@@ -72,31 +91,21 @@
                     <md-content flex layout-padding style="height: 500px" ng-show = "showFlag">
                       <table class="table table-hover">
                         <tr>
-                          <th>User Name</th>
-                          <th>Exp Number</th>
-                          <th>Timestamp</th>
-                          <th>Exp Type</th>
-                          <th>Project</th>
-                          <th>Program</th>
-                          <th>Record Mode</th>
-                          <th>Read Only/Full Device</th>
-                          <th>Tester</th>
-                          <th>Comment</th>
-                          <th>Exp Files</th>
+                          <th>Connection ID</th>
+                          <th>Description</th>
+                          <th>Version</th>
+                          <th>Update Date</th>
+                          <th>File Name</th>
+                          <th>Detail</th>
                           <th>Action</th>
                         </tr>
-                        <tr ng-repeat="row in workFileInfo">
-                          <td>{{row.exp_user}}</td>
-                          <td>{{row.exp_no}}</td>
-                          <td>{{row.timestamp}}</td>
-                          <td>{{row.exp_type}}</td>
-                          <td>{{row.project}}</td>
-                          <td>{{row.program}}</td>
-                          <td>{{row.record_mode}}</td>
-                          <td>{{row.read_only}}</td>
-                          <td>{{row.tester}}</td>
-                          <td>{{row.comment}}</td>
-                          <td>{{row.files.length}}</td>
+                        <tr ng-repeat="conn in connInfo">
+                          <td>{{conn.conn_key}}</td>
+                          <td>{{conn.desc | limitTo:20}} <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">...<div class="popover" ng-show="showPopover"><span>{{conn.desc}}</span></div></a></td>
+                          <td>{{conn.version}}</td>
+                          <td>{{conn.updated_date}}</td>
+                          <td>{{conn.file_name}}</td>
+                          <td><a href=""  ng-click="showConnDetail(conn.detail)">Click</a></td>
                           <td nowrap>
                             <button class="btn" ng-click="editSubFile(row.exp_user, row.exp_no)">
                             <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Edit
@@ -272,6 +281,9 @@
                         | Conn
                         <span ng-show="item.formData[0].conn"><i class="glyphicon glyphicon-ok"></i></span>
                         <span ng-show="item.formData[0].conn==false"><i class="glyphicon glyphicon-info-sign" ng-click="showAlert(item.formData[0].msg)"></i></span>
+                        | Exist
+                        <span ng-show="item.formData[0].key_exist"><i class="glyphicon glyphicon-ok"></i></span>
+                        <span ng-show="item.formData[0].key_exist==false"><i class="glyphicon glyphicon-remove"></i></span>
 
                       </td>
                       <td nowrap>

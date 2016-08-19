@@ -3,6 +3,8 @@
 
 angular.module('ddtApp')
   .controller('datasetImportingCtrl', function ($scope, $http, $state, $mdDialog, $mdToast, $mdMedia,FileUploader) {
+
+    $scope.showPopover=false;
     $scope.exp_files = {
       exp_user : $scope.currentUser ? $scope.currentUser.id : '',
       program : '',
@@ -77,6 +79,10 @@ angular.module('ddtApp')
       queueLimit: 20
     });
 
+    // $scope.uploader.remove = function(item){
+    //
+    // };
+
     // $scope.uploader.onBeforeUploadItem = function(item) {
     //   item.formData.push({file_user_id: $scope.file_user_id[item.index-1]});
     //   console.log($scope.file_user_id[item.index-1]);
@@ -90,13 +96,14 @@ angular.module('ddtApp')
     };
 
     $scope.uploader.onSuccessItem  = function(item, response){
-      item.formData.push({format:response.status.format, conn: response.status.conn, msg: response.status.error_msg, conn_key: response.status.conn_key});
+      item.formData.push({format:response.status.format, conn: response.status.conn, msg: response.status.error_msg, conn_key: response.status.conn_key, key_exist: response.status.key_exist});
       if (response.status.format === true && response.status.conn === true){
         var tmp  = {
           file_name: response.status.file_name,
           file_id : response.status.file_id,
           file_size : item.file.size,
-          conn_key : response.status.conn_key
+          conn_key : response.status.conn_key,
+          key_exist : response.status.key_exist
         };
         $scope.file_log.push(tmp);
       } ;
@@ -114,38 +121,6 @@ angular.module('ddtApp')
     };
 
     $scope.uploader.onCompleteAll = function (item, response, status, headers){
-
-      // var confirm = $mdDialog.confirm()
-      //     .title('Would you like to confirm your upload')
-      //     .ariaLabel('Confirm Dialog')
-      //     .ok('Confirm')
-      //     .cancel('Cancel');
-      // $mdDialog.show(confirm).then(function() {
-      //   //Confirm Upload
-      //   $scope.exp_files.files = [];
-      //   for (var i = 0; i < $scope.file_log.length; i ++){
-      //     $scope.exp_files.files.push($scope.file_log[i]);
-      //   }
-      //
-      //   $http.post('/confirm$work$file$upload', $scope.exp_files).then (function (response) {
-      //     var msg = response.data.status;
-      //     $scope.showSimpleToast(msg);
-      //
-      //     $scope.doResetInput();
-      //
-      //   }, function () {
-      //   });
-      //
-      // }, function() {
-      //   //Cancal Upload
-      //
-      //   $http.post('/cancel$work$file$upload', $scope.file_log).then (function (response) {
-      //     var msg = response.data.status;
-      //     $scope.showSimpleToast(msg);
-      //   }, function () {
-      //   });
-      // });
-
     };
 
     $scope.add_uploader.onCompleteAll = function (item, response, status, headers){
@@ -243,11 +218,12 @@ angular.module('ddtApp')
       $scope.search.e_d = '';
 
       var criteria = {
-        shownPeriod: $scope.ShownPeriod,
-        exp_user: $scope.currentUser ? $scope.currentUser.id : ''
+        time_range: $scope.ShownPeriod,
+        start_time: $scope.search.start_date,
+        end_time: $scope.search.end_date
       };
-      $http.post('/get$work$file$summary', criteria).then(function(response){
-          $scope.workFileInfo = response.data.status;
+      $http.post('http://localhost:5000/getConnectionSummary', criteria).then(function(response){
+          $scope.connInfo = response.data.status;
       }, function (){
 
       });
@@ -293,26 +269,40 @@ angular.module('ddtApp')
                   preserveScope: true
                 });
 
-                function DialogController($scope, $mdDialog, result) {
-                  $scope.save_result = result;
-                  $scope.hide = function() {
-                    $mdDialog.hide();
-                  };
-                  $scope.cancel = function() {
-                    $mdDialog.cancel();
-                  };
-                  $scope.answer = function(answer) {
-                    $mdDialog.hide(answer);
-                  };
-              };
-
-
           }, function (){
         });
       };
     };
 
+    $scope.showConnDetail = function (info){
+      var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+      $mdDialog.show({
+            controller: DialogController,
+            templateUrl: 'views/dialog.conn.info.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose:true,
+            fullscreen: useFullScreen,
+            locals:{
+              result: info
+            },
+            scope: $scope,
+            preserveScope: true
+          });
 
+    };
+
+    function DialogController($scope, $mdDialog, result) {
+      $scope.save_result = result;
+      $scope.hide = function() {
+        $mdDialog.hide();
+      };
+      $scope.cancel = function() {
+        $mdDialog.cancel();
+      };
+      $scope.answer = function(answer) {
+        $mdDialog.hide(answer);
+      };
+  };
 
     $scope.deleteExp = function(exp_user, exp_no){
 

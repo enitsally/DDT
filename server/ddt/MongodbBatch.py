@@ -4,6 +4,7 @@ import os
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from datetime import datetime
+from datetime import timedelta
 import pymongo
 import gridfs
 import StringIO
@@ -86,6 +87,7 @@ class mongodbbatch:
             logging.error("Error Code {}: {}".format(e.code, e.details.get('errmsg')))
 
   def save_connection_json(self, connection_collection_name, json_file_id, file_name, file_size, conn_key):
+    status_msg = ''
     fs = gridfs.GridFS(self.db)
     object_ID = ObjectId(json_file_id)
     if fs.exists(object_ID):
@@ -106,7 +108,8 @@ class mongodbbatch:
       try:
         if check is None:
           self.db[connection_collection_name].insert(json_data)
-          logging.info("Key '{}' not exists, insert new one.".format(conn_key))
+          status_msg = "Key '{}' not exists, insert new one.".format(conn_key)
+          logging.info(status_msg)
 
         else:
 
@@ -115,10 +118,10 @@ class mongodbbatch:
             'version') + 1
           self.db[connection_collection_name].find_one_and_replace({conn_key: {'$exists': True}},
                                                                    json_data)
-          logging.info(
-            "Key '{}' exists, update record and change updated-date and version.".format(conn_key))
+          status_msg = "Key '{}' exists, update record and change updated-date and version.".format(conn_key)
+          logging.info(status_msg)
 
-        return True
+        return {'status': True, 'message': status_msg}
 
       except pymongo.errors.ConnectionFailure as cf:
         logging.error("ConnectionFailure:{}".format(cf))
@@ -127,9 +130,9 @@ class mongodbbatch:
       except pymongo.errors.OperationFailure as e:
         logging.error("Error Code {}: {}".format(e.code, e.details.get('errmsg')))
     else:
-      logging.error(
-        "Object ID: {} for connection ID: {} doesn't exist in GridFS system.".format(json_file_id, conn_key))
-    return False
+      status_msg = "Object ID: {} for connection ID: {} doesn't exist in GridFS system.".format(json_file_id, conn_key)
+      logging.error(status_msg)
+    return {'status': False, 'message': status_msg}
 
   def import_md_json(self, md_collection_name, connection_collection_name, json_file_path):
 
@@ -198,6 +201,52 @@ class mongodbbatch:
     fs = gridfs.GridFS(self.db)
     file_id = fs.put(tempFile)
     return file_id
+
+  def check_connection_exit(self, connection_collection_name, conn_key):
+
+    check = self.db[connection_collection_name].find_one({conn_key: {'$exists': True}})
+    if check is not None:
+      return True
+    else:
+      return False
+
+  def get_connection_summary(self, connection_collection_name, time_range, start_time, end_time):
+    result = []
+    if start_time == '' and end_time == '':
+      lt_time = datetime.now()
+      if time_range == 1:
+        gt_time = datetime.now() + timedelta(days=-365)
+      elif time_range == 6:
+        gt_time = datetime.now() + timedelta(days=-183)
+      elif time_range == 3:
+        gt_time = datetime.now() + timedelta(days=-93)
+      else:
+        gt_time = '*'
+    else:
+      gt_time = start_time
+      lt_time = end_time
+    logging.info('start_time:'.format(start_time))
+    logging.info('end_time:'.format(end_time))
+    if gt_time == '*':
+      conn_list = list(self.db[connection_collection_name].find({}).sort("updated_date"))
+    else:
+      conn_list = list(
+        self.db[connection_collection_name].find({'updated_date': {'$lt': lt_time, '$gt': gt_time}}).sort(
+          "updated_date"))
+
+    for conn in conn_list:
+      tmp = {}
+      for k in conn:
+        if type(conn.get(k)) is dict:
+          tmp['conn_key'] = k
+          tmp['desc'] = conn.get(k).get('desc')
+          tmp['version'] = conn.get(k).get('version')
+          tmp['detail'] = conn.get(k)
+        else:
+          tmp[k] = str(conn.get(k))
+      result.append(tmp)
+    return result
+
 #
 # def main():
 #     obj = mongodbbatch(host="172.18.60.20", port="27017", db="DDDB")

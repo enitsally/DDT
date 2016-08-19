@@ -3,7 +3,7 @@
 
     <md-toolbar>
       <div class="md-toolbar-tools">
-        <h2>Connection Save Status</h2>
+        <h2>Connection Detailss</h2>
         <span flex></span>
         <md-button class="md-icon-button" ng-click="cancel()">
           <md-icon md-svg-src="images/icon/close.svg" aria-label="Close dialog"></md-icon>
@@ -13,21 +13,17 @@
 
     <md-dialog-content>
       <div class="md-dialog-content">
-        <h2>Totally, there is {{save_result.length}} connection(s) to be saved.</h2>
           <table class="table table-striped">
                       <thead>
                         <tr>
-                          <th>Connection ID</th>
-                          <th>Save Status</th>
-                          <th>Comments</th>
+                          <th>Item Name</th>
+                          <th>Value</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr ng-repeat="result in save_result">
-                          <td>{{result.conn_key}}</td>
-                          <td ng-show= "result.status">OK</td>
-                          <td ng-show= "!result.status">FAILED</td>
-                          <td>{{result.message}}</td>
+                        <tr ng-repeat="(key,value) in save_result">
+                          <td>{{key}}</td>
+                          <td>{{value}}</td>
                         </tr>
                       </tbody>
                     </table>
