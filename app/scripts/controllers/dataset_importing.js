@@ -205,6 +205,7 @@ angular.module('ddtApp')
 
     $scope.setIndex = function (index){
       $scope.selectedIndex = index;
+      $scope.onShowPeriodChanged();
     };
 
     $scope.onShowPeriodChanged = function (){
@@ -229,7 +230,7 @@ angular.module('ddtApp')
       });
     };
 
-    $scope.doSearchWorkFile = function (){
+    $scope.doSearchDataSet = function (){
       if ($scope.search.start_date !== '') {
         $scope.search.s_y = $scope.search.start_date.getFullYear();
         $scope.search.s_m = $scope.search.start_date.getMonth() + 1;
@@ -241,8 +242,8 @@ angular.module('ddtApp')
         $scope.search.e_m = $scope.search.end_date.getMonth() + 1;
         $scope.search.e_d = $scope.search.end_date.getDate();
       }
-      $http.post('/search$work$file$summary', $scope.search).then(function(response){
-          $scope.workFileInfo = response.data.status;
+      $http.post('http://localhost:5000/getSearchedConnectionSummary', $scope.search).then(function(response){
+          $scope.connInfo = response.data.status;
       }, function (){
 
       });
@@ -253,7 +254,6 @@ angular.module('ddtApp')
       if ($scope.selectedIndex === 1){
         $http.post('http://localhost:5000/saveConnJsonFile', $scope.file_log).then(function(response){
             $scope.result_msg = response.data.status;
-            console.log($scope.result_msg);
 
             var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
             $mdDialog.show({
@@ -304,22 +304,17 @@ angular.module('ddtApp')
       };
   };
 
-    $scope.deleteExp = function(exp_user, exp_no){
+    $scope.deleteDS = function(conn_key){
 
       var confirm = $mdDialog.confirm()
-          .title('Are you sure to delete the entire experiment?')
+          .title('Are you sure to delete the dataset connection?')
           .ariaLabel('Confirm Dialog')
           .ok('Confirm')
           .cancel('Cancel');
       $mdDialog.show(confirm).then(function() {
-        //Confirm Upload
-        var selectedExp = {
-          'exp_user': exp_user,
-          'exp_no': exp_no
-        };
 
-        $http.post('/del$experiment', selectedExp).then(function (response) {
-          var msg = response.data.status;
+        $http.post('http://localhost:5000/deleteConnectionKey', conn_key).then(function (response) {
+          var msg = response.data.status.message;
           $scope.onShowPeriodChanged();
           $scope.showSimpleToast(msg);
         }, function(){

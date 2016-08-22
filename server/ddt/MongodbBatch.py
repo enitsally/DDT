@@ -103,6 +103,7 @@ class mongodbbatch:
       json_data['updated_date'] = timestamp
       json_data['file_name'] = file_name
       json_data['file_size'] = file_size
+      json_data['file_id'] = json_file_id
 
       check = self.db[connection_collection_name].find_one({conn_key: {'$exists': True}})
       try:
@@ -214,11 +215,11 @@ class mongodbbatch:
     result = []
     if start_time == '' and end_time == '':
       lt_time = datetime.now()
-      if time_range == 1:
+      if time_range == '1':
         gt_time = datetime.now() + timedelta(days=-365)
-      elif time_range == 6:
+      elif time_range == '6':
         gt_time = datetime.now() + timedelta(days=-183)
-      elif time_range == 3:
+      elif time_range == '3':
         gt_time = datetime.now() + timedelta(days=-93)
       else:
         gt_time = '*'
@@ -247,6 +248,28 @@ class mongodbbatch:
       result.append(tmp)
     return result
 
+  def del_connection_key(self, connection_collection_name, conn_key):
+    result = {}
+    status = False
+    fs = gridfs.GridFS(self.db)
+    check = self.db[connection_collection_name].find_one({conn_key: {'$exists': True}})
+    if check is not None:
+      object_ID = ObjectId(check.get('file_id'))
+      if fs.exists(object_ID):
+        try:
+          fs.delete(object_ID)
+          self.db[connection_collection_name].delete_one({conn_key: {'$exists': True}})
+          message = "Delete succeed."
+          status = True
+        except pymongo.errors.OperationFailure as e:
+          logging.error(e.details.get('errmsg'))
+          message = e
+      else:
+        message = "Connection Key : {} exist, but GridFS file not exist.".format(conn_key)
+    else:
+      message = "Connection Key : {} doesn't exist.".format(conn_key)
+
+    return {'status': status, 'message': message}
 #
 # def main():
 #     obj = mongodbbatch(host="172.18.60.20", port="27017", db="DDDB")

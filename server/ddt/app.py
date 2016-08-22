@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, session, render_template, redirect
 from flask.ext.cors import CORS, cross_origin
 from MongodbBatch import mongodbbatch
 from DBFactory import Connector
+from datetime import datetime
 import json
 import os
 import pymongo
@@ -76,7 +77,7 @@ def checkconnjsonfile():
         conn = db.connection_test()
         conn_status = conn.get('status')
 
-        exist_status = obj.check_connection_exit(CON_COLLECTION_NAME,key)
+        exist_status = obj.check_connection_exit(CON_COLLECTION_NAME, key)
     else:
       format_status = False
       conn_status = False
@@ -89,7 +90,8 @@ def checkconnjsonfile():
       key = ''
 
     return jsonify({'status': {'format': format_status, 'conn': conn_status, 'file_name': file_name,
-                               'file_id': str(file_id), 'error_msg': conn.get('message'), 'conn_key': key, 'key_exist': exist_status}})
+                               'file_id': str(file_id), 'error_msg': conn.get('message'), 'conn_key': key,
+                               'key_exist': exist_status}})
 
 
 @app.route('/saveConnJsonFile', methods=['GET', 'POST'])
@@ -110,6 +112,7 @@ def saveconnjsonfile():
 
   return jsonify({'status': status})
 
+
 @app.route('/getConnectionSummary', methods=['GET', 'POST'])
 def getconnectionsummary():
   logging.info('API: /getConnectionSummary, method: getconnectionsummary()')
@@ -117,8 +120,28 @@ def getconnectionsummary():
   time_range = input_data['time_range']
   start_time = input_data['start_time']
   end_time = input_data['end_time']
-  result = obj.get_connection_summary(CON_COLLECTION_NAME,time_range,'','')
+  result = obj.get_connection_summary(CON_COLLECTION_NAME, time_range, start_time, end_time)
   return jsonify({'status': result})
+
+
+@app.route('/deleteConnectionKey', methods=['GET', 'POST'])
+def deleteconnectionkey():
+  logging.info('API: /deleteConnectionKey, method: deleteconnectionkey()')
+  conn_key = request.data
+  result = obj.del_connection_key(CON_COLLECTION_NAME, conn_key)
+  return jsonify({'status': result})
+
+
+@app.route('/getSearchedConnectionSummary', methods=['GET', 'POST'])
+def getsearchedconnectionsummary():
+  logging.info('API: /getSearchedConnectionSummary, method: getsearchedconnectionsummary()')
+  input_data = json.loads(request.data)
+  start_time = datetime.strptime(input_data['start_date'][:10], "%Y-%m-%d")
+  end_time = datetime.strptime(input_data['end_date'][:10], "%Y-%m-%d")
+
+  result = obj.get_connection_summary(CON_COLLECTION_NAME, '', start_time, end_time)
+  return jsonify({'status': result})
+
 
 if __name__ == "__main__":
   # logging.config.fileConfig('logging.conf')
