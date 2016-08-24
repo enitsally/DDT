@@ -5,6 +5,9 @@ angular.module('ddtApp')
   .controller('datasetImportingCtrl', function ($scope, $http, $state, $mdDialog, $mdToast, $mdMedia,FileUploader) {
 
     $scope.showPopover=false;
+    $scope.mapped = false;
+    $scope.selectedConnItem = null;
+    $scope.selectedConnKey = [];
     $scope.exp_files = {
       exp_user : $scope.currentUser ? $scope.currentUser.id : '',
       program : '',
@@ -27,12 +30,7 @@ angular.module('ddtApp')
       exp_user : $scope.currentUser ? $scope.currentUser.id : '',
       start_date:'',
       end_date:'',
-      s_y: '',
-      s_m: '',
-      s_d: '',
-      e_y: '',
-      e_m: '',
-      e_d: ''
+      conn_keys:[]
     };
 
     $scope.file_log = [];
@@ -107,7 +105,11 @@ angular.module('ddtApp')
         };
         $scope.file_log.push(tmp);
       } ;
-
+      console.log($scope.save_result);
+      console.log(response.status.conn_key);
+      if ($scope.save_result === response.status.conn_key ){
+        $scope.mapped = true;
+      }
     };
 
     $scope.add_uploader.onSuccessItem  = function(item, response){
@@ -194,12 +196,10 @@ angular.module('ddtApp')
 
       $scope.search.start_date = '';
       $scope.search.end_date = '';
-      $scope.search.s_y = '';
-      $scope.search.s_m = '';
-      $scope.search.s_d = '';
-      $scope.search.e_y = '';
-      $scope.search.e_m = '';
-      $scope.search.e_d = '';
+      $scope.search.conn_keys = [];
+
+      $scope.selectedConnKey = [];
+      $scope.onShowPeriodChanged();
 
     };
 
@@ -211,17 +211,12 @@ angular.module('ddtApp')
     $scope.onShowPeriodChanged = function (){
       $scope.search.start_date = '';
       $scope.search.end_date = '';
-      $scope.search.s_y = '';
-      $scope.search.s_m = '';
-      $scope.search.s_d = '';
-      $scope.search.e_y = '';
-      $scope.search.e_m = '';
-      $scope.search.e_d = '';
+      $scope.search.conn_keys = [];
 
       var criteria = {
         time_range: $scope.ShownPeriod,
-        start_time: $scope.search.start_date,
-        end_time: $scope.search.end_date
+        start_date: $scope.search.start_date,
+        end_date: $scope.search.end_date
       };
       $http.post('http://localhost:5000/getConnectionSummary', criteria).then(function(response){
           $scope.connInfo = response.data.status;
@@ -231,17 +226,18 @@ angular.module('ddtApp')
     };
 
     $scope.doSearchDataSet = function (){
-      if ($scope.search.start_date !== '') {
-        $scope.search.s_y = $scope.search.start_date.getFullYear();
-        $scope.search.s_m = $scope.search.start_date.getMonth() + 1;
-        $scope.search.s_d = $scope.search.start_date.getDate();
-      }
-
-      if ($scope.search.end_date !== '') {
-        $scope.search.e_y = $scope.search.end_date.getFullYear();
-        $scope.search.e_m = $scope.search.end_date.getMonth() + 1;
-        $scope.search.e_d = $scope.search.end_date.getDate();
-      }
+      // if ($scope.search.start_date !== '') {
+      //   $scope.search.s_y = $scope.search.start_date.getFullYear();
+      //   $scope.search.s_m = $scope.search.start_date.getMonth() + 1;
+      //   $scope.search.s_d = $scope.search.start_date.getDate();
+      // }
+      //
+      // if ($scope.search.end_date !== '') {
+      //   $scope.search.e_y = $scope.search.end_date.getFullYear();
+      //   $scope.search.e_m = $scope.search.end_date.getMonth() + 1;
+      //   $scope.search.e_d = $scope.search.end_date.getDate();
+      // }
+      $scope.search.conn_keys = $scope.selectedConnKey;
       $http.post('http://localhost:5000/getSearchedConnectionSummary', $scope.search).then(function(response){
           $scope.connInfo = response.data.status;
       }, function (){
@@ -254,6 +250,7 @@ angular.module('ddtApp')
       if ($scope.selectedIndex === 1){
         $http.post('http://localhost:5000/saveConnJsonFile', $scope.file_log).then(function(response){
             $scope.result_msg = response.data.status;
+            $scope.mapped = false;
 
             var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
             $mdDialog.show({
@@ -338,21 +335,20 @@ angular.module('ddtApp')
       }
     };
 
-    $scope.editSubFile = function(exp_user, exp_no){
-      var selectedExp = {
-        'exp_user': exp_user,
-        'exp_no': exp_no
-      };
-      $scope.add_exp_files.exp_user = exp_user;
-      $scope.add_exp_files.exp_no = exp_no;
-
-      $http.post('/get$sub$exp$detail', selectedExp).then(function (response) {
-        $scope.showFlag = false;
-        $scope.subExpList = response.data.status;
-        originalsubExpList = $scope.subExpList.slice(0);
-      }, function(){
-
-      });
+    $scope.editDS = function(conn_key){
+      var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+      $mdDialog.show({
+            controller: DialogController,
+            templateUrl: 'views/dialog.update.conn.info.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose:false,
+            fullscreen: useFullScreen,
+            locals:{
+              result: conn_key
+            },
+            scope: $scope,
+            preserveScope: true
+          });
     };
 
 
@@ -400,4 +396,34 @@ angular.module('ddtApp')
            .ok('Got it!')
        );
     };
+
+    $http.get('http://localhost:5000/getConnectionShort').then(function (response){
+      $scope.fulllist = response.data.status;
+    }, function(){
+
+    });
+
+    $scope.transformChip = function (chip){
+      if (angular.isObject(chip)) {
+        return chip;
+      }
+
+    };
+
+    function createFilterFor(query) {
+        var lowercaseQuery = angular.lowercase(query);
+
+        return function filterFn(colName) {
+          // return (colName.name.toLowerCase().indexOf(lowercaseQuery) === 0) ||
+          //     (colName.type.toLowerCase().indexOf(lowercaseQuery) === 0);
+          return (colName.toLowerCase().indexOf(lowercaseQuery) === 0);
+        };
+    };
+
+    $scope.querySearch = function (query) {
+        var results = query ?  $scope.fulllist.filter(createFilterFor(query)) : [];
+        return results;
+      };
+
+
 });

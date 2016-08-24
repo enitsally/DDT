@@ -211,7 +211,7 @@ class mongodbbatch:
     else:
       return False
 
-  def get_connection_summary(self, connection_collection_name, time_range, start_time, end_time):
+  def get_connection_summary(self, connection_collection_name, time_range, start_time, end_time, conn_keys):
     result = []
     if start_time == '' and end_time == '':
       lt_time = datetime.now()
@@ -228,12 +228,24 @@ class mongodbbatch:
       lt_time = end_time
     logging.info('start_time:'.format(start_time))
     logging.info('end_time:'.format(end_time))
-    if gt_time == '*':
+    if gt_time == '*' and len(conn_keys) == 0:
       conn_list = list(self.db[connection_collection_name].find({}).sort("updated_date"))
-    else:
+    elif len(conn_keys) == 0:
       conn_list = list(
         self.db[connection_collection_name].find({'updated_date': {'$lt': lt_time, '$gt': gt_time}}).sort(
           "updated_date"))
+    elif gt_time == '*':
+      conn_list = []
+      for key in conn_keys:
+        chk = self.db[connection_collection_name].find_one({key: {'$exists': True}})
+        if chk is not None:
+          conn_list.append(chk)
+    else:
+      conn_list = []
+      for key in conn_keys:
+        chk = self.db[connection_collection_name].find_one({"$and":[{'updated_date': {'$lt': lt_time, '$gt': gt_time}}, {key: {'$exists': True}}]})
+        if chk is not None:
+          conn_list.append(chk)
 
     for conn in conn_list:
       tmp = {}
@@ -270,6 +282,17 @@ class mongodbbatch:
       message = "Connection Key : {} doesn't exist.".format(conn_key)
 
     return {'status': status, 'message': message}
+
+  def get_connection_short(self, connection_collection_name):
+    result = []
+    conn_list = list(self.db[connection_collection_name].find({}))
+    for conn in conn_list:
+      for k in conn:
+        if type(conn.get(k)) is dict:
+          tmp = k
+      result.append(tmp)
+    return result
+
 #
 # def main():
 #     obj = mongodbbatch(host="172.18.60.20", port="27017", db="DDDB")

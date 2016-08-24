@@ -63,6 +63,17 @@
               <div class="md-actions" layout="row" layout-align="left center">
                   <md-datepicker ng-model="search.start_date" md-max-date="maxDate" md-placeholder="Enter Start date" ></md-datepicker>
                   <md-datepicker ng-model="search.end_date" md-date-filter="onlyLaterDate" md-max-date="maxDate" md-placeholder="Enter End date"></md-datepicker>
+                  <span flex></span>
+                  <md-chips ng-model="selectedConnKey" md-autocomplete-snap="" md-transform-chip="transformChip($chip)" md-require-match="true">
+                    <md-autocomplete md-selected-item="selectedItem" md-search-text="searchText" md-items="item in querySearch(searchText)" md-item-text="item" placeholder="Search for a connection key name">
+                      <span md-highlight-text="searchText">{{item}}</span>
+                    </md-autocomplete>
+                    <md-chip-template>
+                      <span>
+                        <strong>{{$chip}}</strong>
+                      </span>
+                    </md-chip-template>
+                  </md-chips>
               </div>
               <div layout = "column" flex>
                 <md-card>
@@ -107,7 +118,7 @@
                           <td>{{conn.file_name}}</td>
                           <td><a href=""  ng-click="showConnDetail(conn.detail)">Click</a></td>
                           <td nowrap>
-                            <button class="btn" ng-click="editSubFile(row.exp_user, row.exp_no)">
+                            <button class="btn" ng-click="editDS(conn.conn_key)">
                             <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Edit
                             </button>
                             <button class="btn" ng-click="deleteDS(conn.conn_key)">

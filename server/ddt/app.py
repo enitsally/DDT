@@ -3,6 +3,7 @@ from flask.ext.cors import CORS, cross_origin
 from MongodbBatch import mongodbbatch
 from DBFactory import Connector
 from datetime import datetime
+from datetime import timedelta
 import json
 import os
 import pymongo
@@ -118,9 +119,16 @@ def getconnectionsummary():
   logging.info('API: /getConnectionSummary, method: getconnectionsummary()')
   input_data = json.loads(request.data)
   time_range = input_data['time_range']
-  start_time = input_data['start_time']
-  end_time = input_data['end_time']
-  result = obj.get_connection_summary(CON_COLLECTION_NAME, time_range, start_time, end_time)
+  start_time = input_data['start_date']
+  end_time = input_data['end_date']
+  result = obj.get_connection_summary(CON_COLLECTION_NAME, time_range, start_time, end_time, [])
+  return jsonify({'status': result})
+
+
+@app.route('/getConnectionShort')
+def getconnectionshort():
+  logging.info('API: /getConnectionShort, method: getconnectionshort()')
+  result = obj.get_connection_short(CON_COLLECTION_NAME)
   return jsonify({'status': result})
 
 
@@ -136,10 +144,11 @@ def deleteconnectionkey():
 def getsearchedconnectionsummary():
   logging.info('API: /getSearchedConnectionSummary, method: getsearchedconnectionsummary()')
   input_data = json.loads(request.data)
-  start_time = datetime.strptime(input_data['start_date'][:10], "%Y-%m-%d")
-  end_time = datetime.strptime(input_data['end_date'][:10], "%Y-%m-%d")
+  start_time = input_data['start_date'] if input_data['start_date'] == '' else datetime.strptime(input_data['start_date'][:10], "%Y-%m-%d")
+  end_time = input_data['end_date'] if input_data['end_date'] == '' else datetime.strptime(input_data['end_date'][:10], "%Y-%m-%d") + timedelta(days=1)
+  conn_key = input_data['conn_keys']
 
-  result = obj.get_connection_summary(CON_COLLECTION_NAME, '', start_time, end_time)
+  result = obj.get_connection_summary(CON_COLLECTION_NAME, '', start_time, end_time, conn_key)
   return jsonify({'status': result})
 
 
