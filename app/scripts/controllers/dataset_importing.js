@@ -2,7 +2,7 @@
 
 
 angular.module('ddtApp')
-  .controller('datasetImportingCtrl', function ($scope, $http, $state, $mdDialog, $mdToast, $mdMedia,FileUploader) {
+  .controller('datasetImportingCtrl', function ($scope, $http, $state, $mdDialog, $mdToast, $mdMedia,FileUploader, $window) {
 
     $scope.showPopover=false;
     $scope.mapped = false;
@@ -105,8 +105,6 @@ angular.module('ddtApp')
         };
         $scope.file_log.push(tmp);
       } ;
-      console.log($scope.save_result);
-      console.log(response.status.conn_key);
       if ($scope.save_result === response.status.conn_key ){
         $scope.mapped = true;
       }
@@ -265,6 +263,26 @@ angular.module('ddtApp')
                   scope: $scope,
                   preserveScope: true
                 });
+
+          }, function (){
+        });
+      };
+    };
+
+    $scope.doUpdateDataSet = function(){
+      //import json tab
+      if ($scope.selectedIndex === 1){
+        $http.post('http://localhost:5000/saveConnJsonFile', $scope.file_log).then(function(response){
+            $scope.result_msg = response.data.status;
+            onsole.log($scope.result_msg);
+            $scope.mapped = false;
+            if ($scope.result_msg){
+              $scope.showAlert("Update Succeed.");
+              $window.close();
+            }
+            else {
+              $scope.showAlert("Update Failed.");
+            }
 
           }, function (){
         });
