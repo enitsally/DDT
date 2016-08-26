@@ -8,23 +8,23 @@ angular.module('ddtApp')
     $scope.mapped = false;
     $scope.selectedConnItem = null;
     $scope.selectedConnKey = [];
-    $scope.exp_files = {
-      exp_user : $scope.currentUser ? $scope.currentUser.id : '',
-      program : '',
-      record_mode : '',
-      read_only : '',
-      exp_type : '',
-      project : '',
-      tester : '',
-      comment : '',
-      files: []
-    };
+    // $scope.exp_files = {
+    //   exp_user : $scope.currentUser ? $scope.currentUser.id : '',
+    //   program : '',
+    //   record_mode : '',
+    //   read_only : '',
+    //   exp_type : '',
+    //   project : '',
+    //   tester : '',
+    //   comment : '',
+    //   files: []
+    // };
 
-    $scope.add_exp_files = {
-      exp_user : '',
-      exp_no: '',
-      files: []
-    };
+    // $scope.add_exp_files = {
+    //   exp_user : '',
+    //   exp_no: '',
+    //   files: []
+    // };
 
     $scope.search = {
       exp_user : $scope.currentUser ? $scope.currentUser.id : '',
@@ -33,14 +33,16 @@ angular.module('ddtApp')
       conn_keys:[]
     };
 
-    $scope.file_log = [];
-    $scope.file_user_id = [];
-    $scope.add_file_log = [];
-    $scope.add_file_user_id = [];
     $scope.ShownPeriod = "3";
-    $scope.workFileInfo = [];
-    $scope.subExpList = [];
-    $scope.delsubExpList = [];
+    $scope.file_log = [];
+
+    // $scope.file_user_id = [];
+    // $scope.add_file_log = [];
+    // $scope.add_file_user_id = [];
+    //
+    // $scope.workFileInfo = [];
+    // $scope.subExpList = [];
+    // $scope.delsubExpList = [];
 
     $scope.showFlag = true;
 
@@ -50,7 +52,7 @@ angular.module('ddtApp')
       todayDate.getMonth(),
       todayDate.getDate() + 1
     );
-    var originalsubExpList = [];
+    // var originalsubExpList = [];
 
     $scope.onlyLaterDate = function (date) {
       var day = date;
@@ -72,10 +74,10 @@ angular.module('ddtApp')
       }
     });
 
-    $scope.add_uploader = new FileUploader({
-      url:'/upload$work$file',
-      queueLimit: 20
-    });
+    // $scope.add_uploader = new FileUploader({
+    //   url:'/upload$work$file',
+    //   queueLimit: 20
+    // });
 
     // $scope.uploader.remove = function(item){
     //
@@ -89,9 +91,9 @@ angular.module('ddtApp')
     //   }
     // };
 
-    $scope.add_uploader.onBeforeUploadItem = function(item) {
-      item.formData.push({file_user_id: $scope.add_file_user_id[item.index-1]});
-    };
+    // $scope.add_uploader.onBeforeUploadItem = function(item) {
+    //   item.formData.push({file_user_id: $scope.add_file_user_id[item.index-1]});
+    // };
 
     $scope.uploader.onSuccessItem  = function(item, response){
       item.formData.push({format:response.status.format, conn: response.status.conn, msg: response.status.error_msg, conn_key: response.status.conn_key, key_exist: response.status.key_exist});
@@ -110,87 +112,87 @@ angular.module('ddtApp')
       }
     };
 
-    $scope.add_uploader.onSuccessItem  = function(item, response){
-      var tmp  = {
-        file_name: response.status.file_name,
-        file_id : response.status.file_id,
-        file_size : item.file.size,
-        file_user_id : item.formData[0].file_user_id
-      };
-      $scope.add_file_log.push(tmp);
-    };
+    // $scope.add_uploader.onSuccessItem  = function(item, response){
+    //   var tmp  = {
+    //     file_name: response.status.file_name,
+    //     file_id : response.status.file_id,
+    //     file_size : item.file.size,
+    //     file_user_id : item.formData[0].file_user_id
+    //   };
+    //   $scope.add_file_log.push(tmp);
+    // };
 
-    $scope.uploader.onCompleteAll = function (item, response, status, headers){
-    };
+    // $scope.uploader.onCompleteAll = function (item, response, status, headers){
+    // };
 
-    $scope.add_uploader.onCompleteAll = function (item, response, status, headers){
-      var confirm = $mdDialog.confirm()
-          .title('Would you like to confirm adding files to experiment?')
-          .ariaLabel('Confirm Dialog')
-          .ok('Confirm')
-          .cancel('Cancel');
-      $mdDialog.show(confirm).then(function() {
-        //Confirm Upload
-        $scope.add_exp_files.files = [];
-        for (var i = 0; i < $scope.add_file_log.length; i ++){
-          $scope.add_exp_files.files.push($scope.add_file_log[i]);
-        }
-
-        $http.post('/confirm$add$work$file', $scope.add_exp_files).then (function (response) {
-          var msg = response.data.status;
-          $scope.showSimpleToast(msg);
-          $scope.doResetInput();
-
-        }, function () {
-        });
-        $scope.showFlag = true;
-        $scope.onShowPeriodChanged();
-
-      }, function() {
-        //Cancal Upload
-
-        $http.post('/cancel$work$file$upload', $scope.add_file_log).then (function (response) {
-          var msg = response.data.status;
-          $scope.showSimpleToast(msg);
-        }, function () {
-        });
-      });
-    };
+    // $scope.add_uploader.onCompleteAll = function (item, response, status, headers){
+    //   var confirm = $mdDialog.confirm()
+    //       .title('Would you like to confirm adding files to experiment?')
+    //       .ariaLabel('Confirm Dialog')
+    //       .ok('Confirm')
+    //       .cancel('Cancel');
+    //   $mdDialog.show(confirm).then(function() {
+    //     //Confirm Upload
+    //     $scope.add_exp_files.files = [];
+    //     for (var i = 0; i < $scope.add_file_log.length; i ++){
+    //       $scope.add_exp_files.files.push($scope.add_file_log[i]);
+    //     }
+    //
+    //     $http.post('/confirm$add$work$file', $scope.add_exp_files).then (function (response) {
+    //       var msg = response.data.status;
+    //       $scope.showSimpleToast(msg);
+    //       $scope.doResetInput();
+    //
+    //     }, function () {
+    //     });
+    //     $scope.showFlag = true;
+    //     $scope.onShowPeriodChanged();
+    //
+    //   }, function() {
+    //     //Cancal Upload
+    //
+    //     $http.post('/cancel$work$file$upload', $scope.add_file_log).then (function (response) {
+    //       var msg = response.data.status;
+    //       $scope.showSimpleToast(msg);
+    //     }, function () {
+    //     });
+    //   });
+    // };
 
     $scope.clearAll = function(){
       $scope.uploader.clearQueue();
       $scope.file_log = [];
     };
 
-    $scope.add_clearAll = function(){
-      $scope.add_uploader.clearQueue();
-      $scope.add_file_log = [];
-    };
+    // $scope.add_clearAll = function(){
+    //   $scope.add_uploader.clearQueue();
+    //   $scope.add_file_log = [];
+    // };
 
     $scope.doResetInput = function(){
 
-      $scope.showFlag = true;
-      $scope.subExpList = [];
+      // $scope.showFlag = true;
+      // $scope.subExpList = [];
       $scope.uploader.clearQueue();
-      $scope.file_user_id = [];
+      // $scope.file_user_id = [];
       $scope.file_log = [];
 
-      $scope.add_uploader.clearQueue();
-      $scope.add_file_user_id = [];
-      $scope.add_file_log = [];
-
-      $scope.exp_files.program = '';
-      $scope.exp_files.record_mode = '';
-      $scope.exp_files.read_only = '';
-      $scope.exp_files.exp_type = '';
-      $scope.exp_files.project = '';
-      $scope.exp_files.tester = '';
-      $scope.exp_files.comment = '';
-      $scope.exp_files.files = [];
-
-      $scope.add_exp_files.exp_user = '';
-      $scope.add_exp_files.exp_no = '';
-      $scope.add_exp_files.files = [];
+      // $scope.add_uploader.clearQueue();
+      // $scope.add_file_user_id = [];
+      // $scope.add_file_log = [];
+      //
+      // $scope.exp_files.program = '';
+      // $scope.exp_files.record_mode = '';
+      // $scope.exp_files.read_only = '';
+      // $scope.exp_files.exp_type = '';
+      // $scope.exp_files.project = '';
+      // $scope.exp_files.tester = '';
+      // $scope.exp_files.comment = '';
+      // $scope.exp_files.files = [];
+      //
+      // $scope.add_exp_files.exp_user = '';
+      // $scope.add_exp_files.exp_no = '';
+      // $scope.add_exp_files.files = [];
 
       $scope.search.start_date = '';
       $scope.search.end_date = '';
@@ -248,7 +250,6 @@ angular.module('ddtApp')
       if ($scope.selectedIndex === 1){
         $http.post('http://localhost:5000/saveConnJsonFile', $scope.file_log).then(function(response){
             $scope.result_msg = response.data.status;
-            $scope.mapped = false;
 
             var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
             $mdDialog.show({
@@ -264,6 +265,10 @@ angular.module('ddtApp')
                   preserveScope: true
                 });
 
+            $scope.onShowPeriodChanged();
+            $scope.uploader.clearQueue();
+            $scope.file_log = [];
+
           }, function (){
         });
       };
@@ -271,22 +276,23 @@ angular.module('ddtApp')
 
     $scope.doUpdateDataSet = function(){
       //import json tab
-      if ($scope.selectedIndex === 1){
-        $http.post('http://localhost:5000/saveConnJsonFile', $scope.file_log).then(function(response){
-            $scope.result_msg = response.data.status;
-            onsole.log($scope.result_msg);
-            $scope.mapped = false;
-            if ($scope.result_msg){
-              $scope.showAlert("Update Succeed.");
-              $window.close();
-            }
-            else {
-              $scope.showAlert("Update Failed.");
-            }
+      $http.post('http://localhost:5000/saveConnJsonFile', $scope.file_log).then(function(response){
+          $scope.result_msg = response.data.status;
+          $scope.mapped = false;
+          if ($scope.result_msg){
+            $scope.showAlert("Update Succeed.");
+            $scope.onShowPeriodChanged();
+          }
+          else {
+            $scope.showAlert("Update Failed.");
+          }
 
-          }, function (){
-        });
-      };
+          $scope.uploader.clearQueue();
+          $scope.file_log = [];
+
+        }, function (){
+      });
+
     };
 
     $scope.showConnDetail = function (info){
@@ -342,16 +348,32 @@ angular.module('ddtApp')
 
     };
 
-    $scope.doResetWorkFile = function(){
-      $scope.subExpList = originalsubExpList.splice(0);
+    $scope.testDS = function(conn_key){
+
+      $http.post('http://localhost:5000/testConnectionKey', conn_key).then(function(response){
+
+          if (response.data.status.conn){
+            $scope.showAlert("Connection test passed.");
+          }
+          else{
+            $scope.showAlert(response.data.status.error_msg);
+          }
+      }, function (){
+
+      });
+
     };
 
-    $scope.clearDetail = function(){
-      if ($scope.showFlag === true){
-        originalsubExpList = [];
-        $scope.subExpList = [];
-      }
-    };
+    // $scope.doResetWorkFile = function(){
+    //   $scope.subExpList = originalsubExpList.splice(0);
+    // };
+    //
+    // $scope.clearDetail = function(){
+    //   if ($scope.showFlag === true){
+    //     originalsubExpList = [];
+    //     $scope.subExpList = [];
+    //   }
+    // };
 
     $scope.editDS = function(conn_key){
       var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
@@ -370,32 +392,32 @@ angular.module('ddtApp')
     };
 
 
-    $scope.delFromExp = function(index, exp_user, exp_no, sub_exp){
-      var tmp = {
-        'exp_user': exp_user,
-        'exp_no': exp_no,
-        'sub_exp': sub_exp
-      };
-      if (index >=-1){
-        $scope.subExpList.splice(index, 1);
-      }
-      $scope.delsubExpList.push(tmp);
-    }
+    // $scope.delFromExp = function(index, exp_user, exp_no, sub_exp){
+    //   var tmp = {
+    //     'exp_user': exp_user,
+    //     'exp_no': exp_no,
+    //     'sub_exp': sub_exp
+    //   };
+    //   if (index >=-1){
+    //     $scope.subExpList.splice(index, 1);
+    //   }
+    //   $scope.delsubExpList.push(tmp);
+    // }
 
-    $http.get('/get$record$mode').then (function (response) {
-      $scope.recordmode_list = response.data.status;
-    }, function () {
-    });
-
-    $http.get('/get$program').then (function (response) {
-      $scope.program_list = response.data.status;
-    }, function () {
-    });
-
-    $http.get('/get$exp$type').then (function (response) {
-      $scope.exp_type = response.data.status;
-    }, function () {
-    });
+    // $http.get('/get$record$mode').then (function (response) {
+    //   $scope.recordmode_list = response.data.status;
+    // }, function () {
+    // });
+    //
+    // $http.get('/get$program').then (function (response) {
+    //   $scope.program_list = response.data.status;
+    // }, function () {
+    // });
+    //
+    // $http.get('/get$exp$type').then (function (response) {
+    //   $scope.exp_type = response.data.status;
+    // }, function () {
+    // });
 
 
     $scope.showSimpleToast = function(showmgs) {

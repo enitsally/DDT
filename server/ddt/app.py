@@ -95,6 +95,24 @@ def checkconnjsonfile():
                                'key_exist': exist_status}})
 
 
+@app.route('/testConnectionKey', methods=['GET', 'POST'])
+def testconnectionkey():
+  logging.info('API: /testConnectionKey, method: testconnectionkey()')
+  if request.method == 'POST':
+    conn_key = request.data
+    conn_info = obj.get_connection_key(CON_COLLECTION_NAME, conn_key)
+    if conn_info is None:
+      conn_status = False
+      error_msg = "System don't have such key: {}".format(conn_key)
+    else:
+      db = Connector(conn_info)
+      conn = db.connection_test()
+      conn_status = conn.get('status')
+      error_msg = conn.get('message')
+
+    return jsonify({'status': {'conn': conn_status, 'error_msg': error_msg}})
+
+
 @app.route('/saveConnJsonFile', methods=['GET', 'POST'])
 def saveconnjsonfile():
   logging.info('API: /saveConnJsonFile, method: saveconnjsonfile()')
@@ -144,8 +162,11 @@ def deleteconnectionkey():
 def getsearchedconnectionsummary():
   logging.info('API: /getSearchedConnectionSummary, method: getsearchedconnectionsummary()')
   input_data = json.loads(request.data)
-  start_time = input_data['start_date'] if input_data['start_date'] == '' else datetime.strptime(input_data['start_date'][:10], "%Y-%m-%d")
-  end_time = input_data['end_date'] if input_data['end_date'] == '' else datetime.strptime(input_data['end_date'][:10], "%Y-%m-%d") + timedelta(days=1)
+  start_time = input_data['start_date'] if input_data['start_date'] == '' else datetime.strptime(
+    input_data['start_date'][:10], "%Y-%m-%d")
+  end_time = input_data['end_date'] if input_data['end_date'] == '' else datetime.strptime(input_data['end_date'][:10],
+                                                                                           "%Y-%m-%d") + timedelta(
+    days=1)
   conn_key = input_data['conn_keys']
 
   result = obj.get_connection_summary(CON_COLLECTION_NAME, '', start_time, end_time, conn_key)

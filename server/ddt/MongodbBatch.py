@@ -229,11 +229,11 @@ class mongodbbatch:
     logging.info('start_time:'.format(start_time))
     logging.info('end_time:'.format(end_time))
     if gt_time == '*' and len(conn_keys) == 0:
-      conn_list = list(self.db[connection_collection_name].find({}).sort("updated_date"))
+      conn_list = list(self.db[connection_collection_name].find({}).sort("updated_date", -1))
     elif len(conn_keys) == 0:
       conn_list = list(
         self.db[connection_collection_name].find({'updated_date': {'$lt': lt_time, '$gt': gt_time}}).sort(
-          "updated_date"))
+          "updated_date", -1))
     elif gt_time == '*':
       conn_list = []
       for key in conn_keys:
@@ -261,7 +261,7 @@ class mongodbbatch:
     return result
 
   def del_connection_key(self, connection_collection_name, conn_key):
-    result = {}
+
     status = False
     fs = gridfs.GridFS(self.db)
     check = self.db[connection_collection_name].find_one({conn_key: {'$exists': True}})
@@ -282,6 +282,19 @@ class mongodbbatch:
       message = "Connection Key : {} doesn't exist.".format(conn_key)
 
     return {'status': status, 'message': message}
+
+  def get_connection_key(self, connection_collection_name, conn_key):
+    conn = self.db[connection_collection_name].find_one({conn_key: {'$exists': True}})
+
+    if conn is None:
+      return None
+    else:
+      for k in conn:
+        if type(conn.get(k)) is dict:
+          return conn.get(k)
+        else:
+          continue
+
 
   def get_connection_short(self, connection_collection_name):
     result = []

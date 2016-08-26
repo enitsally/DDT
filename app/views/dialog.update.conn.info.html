@@ -67,7 +67,7 @@
                       <span ng-show="item.formData[1].format==false"><i class="glyphicon glyphicon-remove"></i></span>
                       | Conn
                       <span ng-show="item.formData[0].conn"><i class="glyphicon glyphicon-ok"></i></span>
-                      <span ng-show="item.formData[0].conn==false"><i class="glyphicon glyphicon-info-sign" ng-click="showAlert(item.formData[0].msg)"></i></span>
+                      <span ng-show="item.formData[0].conn==false"><a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;"><i class="glyphicon glyphicon-info-sign"></i><div class="popover" ng-show="showPopover"><span>{{item.formData[0].msg}}</span></div></a></span>
                       | Mapped
                       <span ng-show="item.formData[0].conn_key == save_result"><i class="glyphicon glyphicon-ok" ></i></span>
                       <span ng-show="item.formData[0].conn_key !== save_result && item.formData[0].conn_key" ><i class="glyphicon glyphicon-remove"></i></span>

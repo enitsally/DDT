@@ -65,7 +65,7 @@
                   <md-datepicker ng-model="search.end_date" md-date-filter="onlyLaterDate" md-max-date="maxDate" md-placeholder="Enter End date"></md-datepicker>
                   <span flex></span>
                   <md-chips ng-model="selectedConnKey" md-autocomplete-snap="" md-transform-chip="transformChip($chip)" md-require-match="true">
-                    <md-autocomplete md-selected-item="selectedItem" md-search-text="searchText" md-items="item in querySearch(searchText)" md-item-text="item" placeholder="Search for a connection key name">
+                    <md-autocomplete md-selected-item="selectedItem" md-search-text="searchText" md-items="item in querySearch(searchText)" md-item-text="item" placeholder="Search for connection key">
                       <span md-highlight-text="searchText">{{item}}</span>
                     </md-autocomplete>
                     <md-chip-template>
@@ -78,12 +78,8 @@
               <div layout = "column" flex>
                 <md-card>
                   <md-card-title>
-
                     <md-card-title-text layout="row">
-                      <div flex = "20">
-                        <md-checkbox ng-model="showFlag" ng-change = "clearDetail()">Show Summary</md-checkbox>
-                      </div>
-                      <div flex = "60" layout="row" layout-align="center center">
+                      <div flex = "80" layout="row" layout-align="center center">
                         <h5><strong>Current Dataset Overview</strong></h5><div ng-show= "workFileInfo.length"><h5><strong>({{workFileInfo.length}})</strong></h5></div>
                       </div>
                       <div flex = "20" layout="row" layout-align="center center">
@@ -99,7 +95,7 @@
                     </md-card-title-text>
                   </md-card-title>
                   <md-card-content>
-                    <md-content flex layout-padding style="height: 500px" ng-show = "showFlag">
+                    <md-content flex layout-padding style="height: 500px" >
                       <table class="table table-hover">
                         <tr>
                           <th>Connection ID</th>
@@ -122,113 +118,15 @@
                             <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Edit
                             </button>
                             <button class="btn" ng-click="deleteDS(conn.conn_key)">
-                            <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Delete
+                            <span class="glyphicon glyphicon-remove"></span>&nbsp;&nbsp;Delete
                             </button>
-
-                          </td>
-                        </tr>
-                      </table>
-                    </md-content>
-                  </md-card-content>
-                </md-card>
-                <md-card ng-show = "!showFlag && subExpList.length !=0">
-                  <md-card-title layout="row" layout-align="center center">
-                    <h5><strong>Detail Sub Experiements List</strong></h5>
-                  </md-card-title>
-                  <md-card-content>
-                    <md-content flex layout-padding style="height: 400px" >
-                      <table class="table table-hover">
-                        <tr>
-                          <th>User Name</th>
-                          <th>Exp Number</th>
-                          <th>Sub Exp Number</th>
-                          <th>File Description</th>
-                          <th>File Name</th>
-                          <th>File Size</th>
-                          <th>Action</th>
-                        </tr>
-                        <tr ng-repeat="row in subExpList">
-                          <td>{{row.exp_user}}</td>
-                          <td>{{row.exp_no}}</td>
-                          <td>{{row.exp_sub_no}}</td>
-                          <td>{{row.file_descr}}</td>
-                          <td>{{row.file_name}}</td>
-                          <td>{{row.file_size}}</td>
-                          <td>
-                            <button class="btn" ng-click="delFromExp($index, row.exp_user, row.exp_no, row.exp_sub_no)">
-                            <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Remove
+                            <button class="btn" ng-click="testDS(conn.conn_key)">
+                            <span class="glyphicon glyphicon-play-circle"></span>&nbsp;&nbsp;Test
                             </button>
                           </td>
                         </tr>
                       </table>
                     </md-content>
-                  </md-card-content>
-                </md-card>
-                <md-card ng-show = "!showFlag && subExpList.length !=0">
-                  <md-card-title layout="row" layout-align="center start">
-                    <h5><strong>Add New Sub Experiment Files</strong></h5>
-                  </md-card-title>
-                  <md-card-content layout = "row" layout-align="center start">
-                    <div class="col-md-3" flex>
-                        <h3>Select Multiple files</h3>
-                        <input type="file" nv-file-select="" uploader="add_uploader" multiple /><br/>
-                    </div>
-                    <div class="col-md-9" style="margin-bottom: 80px">
-                      <h3>Upload queue</h3>
-                      <p>Queue length: {{ add_uploader.queue.length }}</p>
-                      <table class="table">
-                        <thead>
-                          <tr>
-                            <th width="60%">Name</th>
-                            <th ng-show="add_uploader.isHTML5">Size</th>
-                            <th ng-show="add_uploader.isHTML5">Progress</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr ng-repeat="item in add_uploader.queue">
-                            <td><strong>{{ item.file.name }}</strong></td>
-                            <td ng-show="add_uploader.isHTML5" nowrap>{{ item.file.size/1024/1024|number:2 }} MB</td>
-                            <td ng-show="add_uploader.isHTML5">
-                              <div class="progress" style="margin-bottom: 0;">
-                                <div class="progress-bar" role="progressbar" ng-style="{ 'width': item.progress + '%' }"></div>
-                              </div>
-                            </td>
-                            <td class="text-center">
-                              <span ng-show="item.isSuccess"><i class="glyphicon glyphicon-ok"></i></span>
-                              <span ng-show="item.isError"><i class="glyphicon glyphicon-remove"></i></span>
-                            </td>
-                            <td nowrap>
-                              <!-- <button type="button" class="btn btn-success btn-xs" ng-click="item.upload()" ng-disabled="item.isReady || item.isUploading || item.isSuccess">
-                                <span class="glyphicon glyphicon-upload"></span> Upload
-                              </button> -->
-                              <button type="button" class="btn btn-danger btn-xs" ng-click="item.remove()">
-                                <span class="glyphicon glyphicon-trash"></span> Remove
-                              </button>
-                              <!-- <md-input-container> -->
-                                <label>Description</label>
-                                <input ng-model="add_file_descr[$index]">
-                              <!-- </md-input-container> -->
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                      <div>
-                        <div>
-                          Queue progress:
-                          <div class="progress" style="">
-                            <div class="progress-bar" role="progressbar" ng-style="{ 'width': add_uploader.progress + '%' }"></div>
-                          </div>
-                        </div>
-                        <button type="button" class="btn btn-success btn-s" ng-click="add_uploader.uploadAll()" ng-disabled="!add_uploader.getNotUploadedItems().length">
-                          <span class="glyphicon glyphicon-upload"></span> Add all
-                        </button>
-                        <button type="button" class="btn btn-danger btn-s" ng-click="add_clearAll()" ng-disabled="!add_uploader.queue.length">
-                          <span class="glyphicon glyphicon-trash"></span> Remove all
-                        </button>
-                      </div>
-                    </div>
                   </md-card-content>
                 </md-card>
               </div>
@@ -291,16 +189,13 @@
                         <span ng-show="item.formData[1].format==false"><i class="glyphicon glyphicon-remove"></i></span>
                         | Conn
                         <span ng-show="item.formData[0].conn"><i class="glyphicon glyphicon-ok"></i></span>
-                        <span ng-show="item.formData[0].conn==false"><i class="glyphicon glyphicon-info-sign" ng-click="showAlert(item.formData[0].msg)"></i></span>
+                        <span ng-show="item.formData[0].conn==false"><a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;"><i class="glyphicon glyphicon-info-sign"></i><div class="popover" ng-show="showPopover"><span>{{item.formData[0].msg}}</span></div></a></span>
                         | Exist
                         <span ng-show="item.formData[0].key_exist"><i class="glyphicon glyphicon-ok"></i></span>
                         <span ng-show="item.formData[0].key_exist==false"><i class="glyphicon glyphicon-remove"></i></span>
 
                       </td>
                       <td nowrap>
-                        <!-- <button type="button" class="btn btn-success btn-xs" ng-click="item.upload()" ng-disabled="item.isReady || item.isUploading || item.isSuccess">
-                          <span class="glyphicon glyphicon-upload"></span> Upload
-                        </button> -->
                         <button type="button" class="btn btn-danger btn-xs" ng-click="item.remove()">
                           <span class="glyphicon glyphicon-trash"></span> Remove
                         </button>
