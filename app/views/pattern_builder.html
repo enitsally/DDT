@@ -1,8 +1,51 @@
 
 <style>
+    .popover {
+        text-decoration: none;
+        color: LightGray;
+        position: absolute;
+        left: 100%;
+        top: 0;
+        display: block;
+        padding: 0 20px;
+    }
+
+    .popover span {
+        display: block;
+        font-weight: 200;
+    }
     .my-drop-zone { border: dotted 3px lightgray; }
     .nv-file-over { border: dotted 3px red; } /* Default class applied to drop zones on over */
     .another-file-over-class { border: dotted 3px green; }
+    .checkboxdemoSyncing .checkboxDemo1 div { clear: both; }
+    .checkboxdemoSyncing legend { color: #3F51B5; }
+    .checkboxdemoSyncing legend code {  color: #3F51B5;
+                                        font-weight: normal; }
+    .checkboxdemoSyncing p { padding-left: 8px; }
+    .checkboxdemoSyncing .info { padding-left: 13px; }
+    .checkboxdemoSyncing div.standard { padding: 8px;
+                                        padding-left: 15px; }
+    .checkboxdemoSyncing fieldset.standard {  border-style: solid;
+                                              border-width: 1px;
+                                              height: 100%; }
+    .autocompletedemoCustomTemplate .autocomplete-custom-template li {
+        border-bottom: 1px solid #ccc;
+        height: auto;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        white-space: normal; }
+    .autocompletedemoCustomTemplate .autocomplete-custom-template li:last-child {
+        border-bottom-width: 0; }
+
+    .autocompletedemoCustomTemplate .autocomplete-custom-template .item-title,
+    .autocompletedemoCustomTemplate .autocomplete-custom-template .item-metadata {
+        display: block;
+        line-height: 2; }
+
+    .autocompletedemoCustomTemplate .autocomplete-custom-template .item-title md-icon {
+        height: 18px;
+        width: 18px; }
+
     html, body { height: 100%; }
     table, th , td {
         border-collapse: collapse;
@@ -61,42 +104,48 @@
         <md-tab md-on-select = "setIndex(0)" label="Pattern Overview">
           <md-card>
             <md-card-content layout="column">
-              <div class="md-actions" layout="row" layout-align="left center">
-                <md-card class="md-padding">
-                  <fieldset class="standard" >
-                    <legend>Select Pattern Types </legend>
-                    <div layout="row" layout-wrap flex>
-                      <div flex="50">
-                        <md-checkbox aria-label="Select All"
-                                     ng-checked="isChecked()"
-                                     md-indeterminate="isIndeterminate()"
-                                     ng-click="toggleAll()">
-                          <span ng-if="isChecked()">Un-</span>Select All
-                        </md-checkbox>
-                      </div>
-                      <div class="demo-select-all-checkboxes" flex="100" ng-repeat="item in pattern_type">
-                        <md-checkbox ng-checked="exists(item, search.pattern_selected)" ng-click="toggle(item, search.pattern_selected)">
-                         {{ item }}
-                        </md-checkbox>
-                      </div>
+              <div class="md-actions" layout="column">
+
+                <div class="md-padding demo" >
+                  <div layout="row">
+                    <div>
+                      <fieldset class="demo-fieldset">
+                        <div layout="row">
+                          <div>
+                            <md-checkbox aria-label="Select All"
+                                         ng-checked="isChecked()"
+                                         md-indeterminate="isIndeterminate()"
+                                         ng-click="toggleAll()">
+                              <span ng-if="isChecked()">Un-</span>Select All
+                            </md-checkbox>
+                          </div>
+                          <div layout="row" layout-align="space-around center" class="demo-select-all-checkboxes" ng-repeat="item in pattern_type">
+                            <div>
+                              <md-checkbox ng-checked="exists(item, search.pattern_selected)" ng-click="toggle(item, search.pattern_selected)">
+                               {{ item }}
+                              </md-checkbox>
+                            </div>
+                          </div>
+                        </div>
+                      </fieldset>
                     </div>
-                  </fieldset>
-                </md-card>
-
-                <md-datepicker ng-model="search.start_date" md-max-date="maxDate" md-placeholder="Enter Start date" ></md-datepicker>
-                <md-datepicker ng-model="search.end_date" md-date-filter="onlyLaterDate" md-max-date="maxDate" md-placeholder="Enter End date"></md-datepicker>
-
-                <span flex></span>
-                <md-chips ng-model="selectedConnKey" md-autocomplete-snap="" md-transform-chip="transformChip($chip)" md-require-match="true">
-                  <md-autocomplete md-selected-item="selectedItem" md-search-text="searchText" md-items="item in querySearch(searchText)" md-item-text="item" placeholder="Search for connection key">
-                    <span md-highlight-text="searchText">{{item}}</span>
-                  </md-autocomplete>
-                  <md-chip-template>
-                    <span>
-                      <strong>{{$chip}}</strong>
-                    </span>
-                  </md-chip-template>
-                </md-chips>
+                  </div>
+                </div>
+                <div layout="row">
+                  <md-datepicker ng-model="search.start_date" md-max-date="maxDate" md-placeholder="Enter Start date" ></md-datepicker>
+                  <md-datepicker ng-model="search.end_date" md-date-filter="onlyLaterDate" md-max-date="maxDate" md-placeholder="Enter End date"></md-datepicker>
+                  <span flex></span>
+                  <md-chips ng-model="selectedConnKey" md-autocomplete-snap="" md-transform-chip="transformChip($chip)" md-require-match="true">
+                    <md-autocomplete md-selected-item="selectedItem" md-search-text="searchText" md-items="item in querySearch(searchText)" md-item-text="item" placeholder="Search for connection key">
+                      <span md-highlight-text="searchText">{{item}}</span>
+                    </md-autocomplete>
+                    <md-chip-template>
+                      <span>
+                        <strong>{{$chip}}</strong>
+                      </span>
+                    </md-chip-template>
+                  </md-chips>
+                </div>
 
               </div>
               <div layout = "column" flex>
@@ -157,97 +206,151 @@
             </md-card-content>
           </md-card>
         </md-tab>
-        <md-tab md-on-select = "setIndex(1)" label="JSON Upload">
+        <md-tab md-on-select = "setIndex(1)" label="Pattern Creation">
           <div layout = "row">
-          <md-card flex = "20">
-            <md-card-content layout="column">
-                <h3>Select files</h3> (Only JSON files are accepted)
-                <div>
-                </div>
-                <br/>
-                <div ng-show="uploader.isHTML5">
-                    <div nv-file-drop="" uploader="uploader">
-                      <div class="well my-drop-zone" nv-file-over="" uploader="uploader" filters="jsonFilter">
-                        Files drop zone
+            <md-card flex = "20">
+              <md-card-content layout="column">
+                  <h3>Select Pattern file</h3> (text are accepted)
+                  <div>
+                  </div>
+                  <br/>
+                  <div ng-show="uploader.isHTML5">
+                      <div nv-file-drop="" uploader="patternUploader" >
+                        <div class="well my-drop-zone" nv-file-over="" uploader="patternUploader">
+                          Files drop zone
+                        </div>
+                      </div>
+                  </div>
+                  <br/>
+                  <div class="col-md-3" flex>
+                    Single
+                    <input type="file" nv-file-select="" uploader="patternUploader" /><br/>
+                  </div>
+              </md-card-content>
+            </md-card>
+            <md-card flex = "50">
+              <md-card-content layout = "column">
+                Pattern Text:
+                <textarea ng-model="patternText" style = "height:250px; overflow:scroll;"></textarea>
+              </md-card-content>
+            </md-card>
+            <md-card>
+              <md-card-content layout = "column">
+                Connection ID:
+                <md-autocomplete
+                  ng-disabled="false"
+                  md-no-cache="true"
+                  md-selected-item="selectedConnKey"
+                  md-search-text-change="searchTextChange(searchText)"
+                  md-search-text="searchText"
+                  md-selected-item-change="selectedConnKeyChange(item)"
+                  md-items="item in querySearch(searchText)"
+                  md-item-text="item.conn_key"
+                  md-min-length="0"
+                  placeholder="Pick an Connection Key"
+                  md-menu-class="autocomplete-custom-template">
+                  <md-item-template>
+                    <span class="item-title">
+                      <md-icon md-svg-icon="images/icon/octicon-repo.svg"></md-icon>
+                        <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">{{item.conn_key}}<div class="popover" ng-show="showPopover"><span flex>{{item.desc}}</span></div></a>
+                    </span>
+                  </md-item-template>
+                </md-autocomplete>
+              </md-card-content>
+            </md-card>
+
+          </div>
+          <div layout = "row">
+            <md-card flex = "20">
+              <md-card-content layout="column">
+                  <h3>Select attachments</h3> (Only text files are accepted)
+                  <div>
+                  </div>
+                  <br/>
+                  <div ng-show="uploader.isHTML5">
+                      <div nv-file-drop="" uploader="uploader">
+                        <div class="well my-drop-zone" nv-file-over="" uploader="uploader" filters="txtFilter">
+                          Files drop zone
+                        </div>
+                      </div>
+                  </div>
+                  <br/>
+                  <div class="col-md-3" flex>
+                    Multiple
+                    <input type="file" nv-file-select="" filters="txtFilter" uploader="uploader" multiple /><br/>
+                  </div>
+              </md-card-content>
+            </md-card>
+            <md-card flex = "70">
+              <md-card-content layout = "row" >
+                <div class="col-md-9" style="margin-bottom: 40px">
+                  <h3>Upload queue</h3>
+                  <p>Queue length: {{ uploader.queue.length }}</p>
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th width="50%">Name</th>
+                        <th ng-show="uploader.isHTML5">Size</th>
+                        <th ng-show="uploader.isHTML5">Progress</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                        <th>Attributes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="item in uploader.queue">
+                        <td><strong>{{ item.file.name }}</strong></td>
+                        <td ng-show="uploader.isHTML5" nowrap>{{ item.file.size/1024|number:2 }} B</td>
+                        <td ng-show="uploader.isHTML5">
+                          <div class="progress" style="margin-bottom: 0;">
+                            <div class="progress-bar" role="progressbar" ng-style="{ 'width': item.progress + '%' }"></div>
+                          </div>
+                        </td>
+                        <td class="text-center" nowrap>
+                          Check
+                          <span ng-show="item.isSuccess"><i class="glyphicon glyphicon-ok"></i></span>
+                          <span ng-show="item.isError"><i class="glyphicon glyphicon-remove"></i></span>
+                          | Format
+                          <span ng-show="item.formData[0].format"><i class="glyphicon glyphicon-ok"></i></span>
+                          <span ng-show="item.formData[1].format==false"><i class="glyphicon glyphicon-remove"></i></span>
+                          | Conn
+                          <span ng-show="item.formData[0].conn"><i class="glyphicon glyphicon-ok"></i></span>
+                          <span ng-show="item.formData[0].conn==false"><a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;"><i class="glyphicon glyphicon-info-sign"></i><div class="popover" ng-show="showPopover"><span>{{item.formData[0].msg}}</span></div></a></span>
+                          | Exist
+                          <span ng-show="item.formData[0].key_exist"><i class="glyphicon glyphicon-ok"></i></span>
+                          <span ng-show="item.formData[0].key_exist==false"><i class="glyphicon glyphicon-remove"></i></span>
+
+                        </td>
+                        <td nowrap>
+                          <button type="button" class="btn btn-danger btn-xs" ng-click="item.remove()">
+                            <span class="glyphicon glyphicon-trash"></span> Remove
+                          </button>
+                        </td>
+                        <td nowrap>
+                          <label ng-show="item.formData[0].conn_key">Connection ID: </label> {{item.formData[0].conn_key}}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div>
+                    <div>
+                      Queue progress:
+                      <div class="progress" style="">
+                        <div class="progress-bar" role="progressbar" ng-style="{ 'width': uploader.progress + '%' }"></div>
                       </div>
                     </div>
-                </div>
-                <br/>
-                <div class="col-md-3" flex>
-                  Multiple
-                  <input type="file" nv-file-select="" filters="jsonFilter" uploader="uploader" multiple /><br/>
-                </div>
-            </md-card-content>
-          </md-card>
-          <md-card flex = "70">
-            <md-card-content layout = "row" >
-              <div class="col-md-9" style="margin-bottom: 40px">
-                <h3>Upload queue</h3>
-                <p>Queue length: {{ uploader.queue.length }}</p>
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th width="50%">Name</th>
-                      <th ng-show="uploader.isHTML5">Size</th>
-                      <th ng-show="uploader.isHTML5">Progress</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                      <th>Attributes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr ng-repeat="item in uploader.queue">
-                      <td><strong>{{ item.file.name }}</strong></td>
-                      <td ng-show="uploader.isHTML5" nowrap>{{ item.file.size/1024|number:2 }} B</td>
-                      <td ng-show="uploader.isHTML5">
-                        <div class="progress" style="margin-bottom: 0;">
-                          <div class="progress-bar" role="progressbar" ng-style="{ 'width': item.progress + '%' }"></div>
-                        </div>
-                      </td>
-                      <td class="text-center" nowrap>
-                        Check
-                        <span ng-show="item.isSuccess"><i class="glyphicon glyphicon-ok"></i></span>
-                        <span ng-show="item.isError"><i class="glyphicon glyphicon-remove"></i></span>
-                        | Format
-                        <span ng-show="item.formData[0].format"><i class="glyphicon glyphicon-ok"></i></span>
-                        <span ng-show="item.formData[1].format==false"><i class="glyphicon glyphicon-remove"></i></span>
-                        | Conn
-                        <span ng-show="item.formData[0].conn"><i class="glyphicon glyphicon-ok"></i></span>
-                        <span ng-show="item.formData[0].conn==false"><a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;"><i class="glyphicon glyphicon-info-sign"></i><div class="popover" ng-show="showPopover"><span>{{item.formData[0].msg}}</span></div></a></span>
-                        | Exist
-                        <span ng-show="item.formData[0].key_exist"><i class="glyphicon glyphicon-ok"></i></span>
-                        <span ng-show="item.formData[0].key_exist==false"><i class="glyphicon glyphicon-remove"></i></span>
-
-                      </td>
-                      <td nowrap>
-                        <button type="button" class="btn btn-danger btn-xs" ng-click="item.remove()">
-                          <span class="glyphicon glyphicon-trash"></span> Remove
-                        </button>
-                      </td>
-                      <td nowrap>
-                        <label ng-show="item.formData[0].conn_key">Connection ID: </label> {{item.formData[0].conn_key}}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div>
-                  <div>
-                    Queue progress:
-                    <div class="progress" style="">
-                      <div class="progress-bar" role="progressbar" ng-style="{ 'width': uploader.progress + '%' }"></div>
-                    </div>
+                    <button type="button" class="btn btn-success btn-s" ng-click="uploader.uploadAll()" ng-disabled="!uploader.getNotUploadedItems().length">
+                      <span class="glyphicon glyphicon-play-circle"></span> Check all
+                    </button>
+                    <button type="button" class="btn btn-danger btn-s" ng-click="clearAll()" ng-disabled="!uploader.queue.length">
+                      <span class="glyphicon glyphicon-trash"></span> Remove all
+                    </button>
                   </div>
-                  <button type="button" class="btn btn-success btn-s" ng-click="uploader.uploadAll()" ng-disabled="!uploader.getNotUploadedItems().length">
-                    <span class="glyphicon glyphicon-play-circle"></span> Check all
-                  </button>
-                  <button type="button" class="btn btn-danger btn-s" ng-click="clearAll()" ng-disabled="!uploader.queue.length">
-                    <span class="glyphicon glyphicon-trash"></span> Remove all
-                  </button>
                 </div>
-              </div>
-            </md-card-content>
-          </md-card>
-        </div>
+              </md-card-content>
+            </md-card>
+          </div>
+
         </md-tab>
       </md-tabs>
     </form>

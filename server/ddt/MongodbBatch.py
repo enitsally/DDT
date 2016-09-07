@@ -306,6 +306,22 @@ class mongodbbatch:
       result.append(tmp)
     return result
 
+  def get_connection_full(self, connection_collection_name):
+    result = []
+    conn_list = list(self.db[connection_collection_name].find({}))
+    for conn in conn_list:
+      for k in conn:
+        if type(conn.get(k)) is dict:
+          tmp = {'conn_key': k, 'desc': conn.get(k).get('desc')}
+      result.append(tmp)
+    return result
+
+
+  def get_pattern_type(self, sys_collection_name):
+    result = []
+    patter_type = self.db[sys_collection_name].find_one({'pattern_type':{'$exists': True}})
+    result = patter_type.get('pattern_type')
+    return result
 #
 # def main():
 #     obj = mongodbbatch(host="172.18.60.20", port="27017", db="DDDB")

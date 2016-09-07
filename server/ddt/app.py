@@ -15,6 +15,7 @@ import logging.config
 CON_COLLECTION_NAME = 'connection'
 MD_COLLECTION_NAME = 'meta_data'
 USER_COLLECTION_NAME = 'sys_users'
+SYS_COLLECTION_NAME = 'sys_conf'
 
 app = Flask(__name__, static_url_path='')
 app.secret_key = 'ddt key'
@@ -149,6 +150,12 @@ def getconnectionshort():
   result = obj.get_connection_short(CON_COLLECTION_NAME)
   return jsonify({'status': result})
 
+@app.route('/getConnectionFull')
+def getconnectionfull():
+  logging.info('API: /getConnectionFull, method: getconnectionfull()')
+  result = obj.get_connection_full(CON_COLLECTION_NAME)
+  return jsonify({'status': result})
+
 
 @app.route('/deleteConnectionKey', methods=['GET', 'POST'])
 def deleteconnectionkey():
@@ -171,6 +178,24 @@ def getsearchedconnectionsummary():
 
   result = obj.get_connection_summary(CON_COLLECTION_NAME, '', start_time, end_time, conn_key)
   return jsonify({'status': result})
+
+@app.route('/getPatternType', methods=['GET', 'POST'])
+def getpatterntype():
+  logging.info('API: /getPatternType, method: getpatterntype()')
+  result = obj.get_pattern_type(SYS_COLLECTION_NAME)
+  return jsonify({'status': result})
+
+
+@app.route('/checkPatternTextFile', methods=['GET', 'POST'])
+def checkpatterntextfile():
+  logging.info('API: /checkPatternTextFile, method: checkpatterntextfile()')
+  if request.method == 'POST':
+    file = request.files['file']
+    file_name = file.filename
+    file.seek(0)
+    txtContent = file.read()
+    return jsonify({'status': txtContent})
+
 
 
 if __name__ == "__main__":
