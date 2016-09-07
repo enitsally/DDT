@@ -1,1 +1,256 @@
-This is pattern_builder page. 
+
+<style>
+    .my-drop-zone { border: dotted 3px lightgray; }
+    .nv-file-over { border: dotted 3px red; } /* Default class applied to drop zones on over */
+    .another-file-over-class { border: dotted 3px green; }
+    html, body { height: 100%; }
+    table, th , td {
+        border-collapse: collapse;
+        padding: 5px;
+    }
+
+    table tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #ffffff;
+    }
+
+    a {
+    position: relative;
+    }
+
+    .popover {
+        text-decoration: none;
+        color: LightGray;
+        position: absolute;
+        left: 100%;
+        top: 0;
+        display: block;
+        padding: 0 20px;
+    }
+
+    .popover span {
+        display: block;
+        font-weight: 200;
+    }
+
+</style>
+
+
+<br>
+<div layout = "row">
+  <div flex="5"></div>
+  <form flex = "90" layout = "row">
+    <span class="md-headline">Pattern Builder</span>
+    <span flex></span>
+    <md-button class="md-primary md-raised" ng-click="doSearchDataSet()">Search</md-button>
+    <md-button class="md-primary md-raised" ng-click="doSaveDataSet()">Save</md-button>
+      <div layout="row" layout-align="end center">
+        <span flex></span>
+        <md-button ng-click="doResetInput()">Reset</md-button>
+      </div>
+  </form>
+</div>
+<div layout="column" ng-cloak="">
+  <md-contentclass="md-padding" layout="row">
+    <div flex="5"></div>
+    <form flex="90">
+      <md-tabs md-dynamic-height md-border-bottom >
+        <md-tab md-on-select = "setIndex(0)" label="Pattern Overview">
+          <md-card>
+            <md-card-content layout="column">
+              <div class="md-actions" layout="row" layout-align="left center">
+                <md-card class="md-padding">
+                  <fieldset class="standard" >
+                    <legend>Select Pattern Types </legend>
+                    <div layout="row" layout-wrap flex>
+                      <div flex="50">
+                        <md-checkbox aria-label="Select All"
+                                     ng-checked="isChecked()"
+                                     md-indeterminate="isIndeterminate()"
+                                     ng-click="toggleAll()">
+                          <span ng-if="isChecked()">Un-</span>Select All
+                        </md-checkbox>
+                      </div>
+                      <div class="demo-select-all-checkboxes" flex="100" ng-repeat="item in pattern_type">
+                        <md-checkbox ng-checked="exists(item, search.pattern_selected)" ng-click="toggle(item, search.pattern_selected)">
+                         {{ item }}
+                        </md-checkbox>
+                      </div>
+                    </div>
+                  </fieldset>
+                </md-card>
+
+                <md-datepicker ng-model="search.start_date" md-max-date="maxDate" md-placeholder="Enter Start date" ></md-datepicker>
+                <md-datepicker ng-model="search.end_date" md-date-filter="onlyLaterDate" md-max-date="maxDate" md-placeholder="Enter End date"></md-datepicker>
+
+                <span flex></span>
+                <md-chips ng-model="selectedConnKey" md-autocomplete-snap="" md-transform-chip="transformChip($chip)" md-require-match="true">
+                  <md-autocomplete md-selected-item="selectedItem" md-search-text="searchText" md-items="item in querySearch(searchText)" md-item-text="item" placeholder="Search for connection key">
+                    <span md-highlight-text="searchText">{{item}}</span>
+                  </md-autocomplete>
+                  <md-chip-template>
+                    <span>
+                      <strong>{{$chip}}</strong>
+                    </span>
+                  </md-chip-template>
+                </md-chips>
+
+              </div>
+              <div layout = "column" flex>
+                <md-card>
+                  <md-card-title>
+                    <md-card-title-text layout="row">
+                      <div flex = "80" layout="row" layout-align="center center">
+                        <h5><strong>Current Pattern Overview</strong></h5><div ng-show= "patternInfo.length"><h5><strong>({{patternInfo.length}})</strong></h5></div>
+                      </div>
+                      <div flex = "20" layout="row" layout-align="center center">
+                          <span flex></span>
+                            Shown Period:
+                            <select ng-model="ShownPeriod" ng-change="onShowPeriodChanged()" ng-init=onShowPeriodChanged() >
+                                <option value="3">Last 3 Months</option>
+                                <option value="6">Last 6 Months</option>
+                                <option value="1">Last 1 Year</option>
+                                <option value="A">All</option>
+                            </select>
+                      </div>
+                    </md-card-title-text>
+                  </md-card-title>
+                  <md-card-content>
+                    <md-content flex layout-padding style="height: 500px" >
+                      <table class="table table-hover">
+                        <tr>
+                          <th>Connection ID</th>
+                          <th>Description</th>
+                          <th>Version</th>
+                          <th>Update Date</th>
+                          <th>File Name</th>
+                          <th>Detail</th>
+                          <th>Action</th>
+                        </tr>
+                        <tr ng-repeat="conn in connInfo">
+                          <td>{{conn.conn_key}}</td>
+                          <td>{{conn.desc | limitTo:20}} <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">...<div class="popover" ng-show="showPopover"><span>{{conn.desc}}</span></div></a></td>
+                          <td>{{conn.version}}</td>
+                          <td>{{conn.updated_date}}</td>
+                          <td>{{conn.file_name}}</td>
+                          <td><a href=""  ng-click="showConnDetail(conn.detail)">Click</a></td>
+                          <td nowrap>
+                            <button class="btn" ng-click="editDS(conn.conn_key)">
+                            <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Edit
+                            </button>
+                            <button class="btn" ng-click="deleteDS(conn.conn_key)">
+                            <span class="glyphicon glyphicon-remove"></span>&nbsp;&nbsp;Delete
+                            </button>
+                            <button class="btn" ng-click="testDS(conn.conn_key)">
+                            <span class="glyphicon glyphicon-play-circle"></span>&nbsp;&nbsp;Test
+                            </button>
+                          </td>
+                        </tr>
+                      </table>
+                    </md-content>
+                  </md-card-content>
+                </md-card>
+              </div>
+            </md-card-content>
+          </md-card>
+        </md-tab>
+        <md-tab md-on-select = "setIndex(1)" label="JSON Upload">
+          <div layout = "row">
+          <md-card flex = "20">
+            <md-card-content layout="column">
+                <h3>Select files</h3> (Only JSON files are accepted)
+                <div>
+                </div>
+                <br/>
+                <div ng-show="uploader.isHTML5">
+                    <div nv-file-drop="" uploader="uploader">
+                      <div class="well my-drop-zone" nv-file-over="" uploader="uploader" filters="jsonFilter">
+                        Files drop zone
+                      </div>
+                    </div>
+                </div>
+                <br/>
+                <div class="col-md-3" flex>
+                  Multiple
+                  <input type="file" nv-file-select="" filters="jsonFilter" uploader="uploader" multiple /><br/>
+                </div>
+            </md-card-content>
+          </md-card>
+          <md-card flex = "70">
+            <md-card-content layout = "row" >
+              <div class="col-md-9" style="margin-bottom: 40px">
+                <h3>Upload queue</h3>
+                <p>Queue length: {{ uploader.queue.length }}</p>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th width="50%">Name</th>
+                      <th ng-show="uploader.isHTML5">Size</th>
+                      <th ng-show="uploader.isHTML5">Progress</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                      <th>Attributes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="item in uploader.queue">
+                      <td><strong>{{ item.file.name }}</strong></td>
+                      <td ng-show="uploader.isHTML5" nowrap>{{ item.file.size/1024|number:2 }} B</td>
+                      <td ng-show="uploader.isHTML5">
+                        <div class="progress" style="margin-bottom: 0;">
+                          <div class="progress-bar" role="progressbar" ng-style="{ 'width': item.progress + '%' }"></div>
+                        </div>
+                      </td>
+                      <td class="text-center" nowrap>
+                        Check
+                        <span ng-show="item.isSuccess"><i class="glyphicon glyphicon-ok"></i></span>
+                        <span ng-show="item.isError"><i class="glyphicon glyphicon-remove"></i></span>
+                        | Format
+                        <span ng-show="item.formData[0].format"><i class="glyphicon glyphicon-ok"></i></span>
+                        <span ng-show="item.formData[1].format==false"><i class="glyphicon glyphicon-remove"></i></span>
+                        | Conn
+                        <span ng-show="item.formData[0].conn"><i class="glyphicon glyphicon-ok"></i></span>
+                        <span ng-show="item.formData[0].conn==false"><a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;"><i class="glyphicon glyphicon-info-sign"></i><div class="popover" ng-show="showPopover"><span>{{item.formData[0].msg}}</span></div></a></span>
+                        | Exist
+                        <span ng-show="item.formData[0].key_exist"><i class="glyphicon glyphicon-ok"></i></span>
+                        <span ng-show="item.formData[0].key_exist==false"><i class="glyphicon glyphicon-remove"></i></span>
+
+                      </td>
+                      <td nowrap>
+                        <button type="button" class="btn btn-danger btn-xs" ng-click="item.remove()">
+                          <span class="glyphicon glyphicon-trash"></span> Remove
+                        </button>
+                      </td>
+                      <td nowrap>
+                        <label ng-show="item.formData[0].conn_key">Connection ID: </label> {{item.formData[0].conn_key}}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div>
+                  <div>
+                    Queue progress:
+                    <div class="progress" style="">
+                      <div class="progress-bar" role="progressbar" ng-style="{ 'width': uploader.progress + '%' }"></div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-success btn-s" ng-click="uploader.uploadAll()" ng-disabled="!uploader.getNotUploadedItems().length">
+                    <span class="glyphicon glyphicon-play-circle"></span> Check all
+                  </button>
+                  <button type="button" class="btn btn-danger btn-s" ng-click="clearAll()" ng-disabled="!uploader.queue.length">
+                    <span class="glyphicon glyphicon-trash"></span> Remove all
+                  </button>
+                </div>
+              </div>
+            </md-card-content>
+          </md-card>
+        </div>
+        </md-tab>
+      </md-tabs>
+    </form>
+    <div flex="5"></div>
+  </md-content>
+</div>
