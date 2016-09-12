@@ -135,18 +135,18 @@
                   <md-datepicker ng-model="search.start_date" md-max-date="maxDate" md-placeholder="Enter Start date" ></md-datepicker>
                   <md-datepicker ng-model="search.end_date" md-date-filter="onlyLaterDate" md-max-date="maxDate" md-placeholder="Enter End date"></md-datepicker>
                   <span flex></span>
-                  <md-chips ng-model="selectedConnKey" md-autocomplete-snap="" md-transform-chip="transformChip($chip)" md-require-match="true">
-                    <md-autocomplete md-selected-item="selectedItem" md-search-text="searchText" md-items="item in querySearch(searchText)" md-item-text="item" placeholder="Search for connection key">
-                      <span md-highlight-text="searchText">{{item}}</span>
+                  <md-chips ng-model="selectedConnKey" md-autocomplete-snap="" md-transform-chip="transformChip($chip.conn_key)" md-require-match="true">
+                    <md-autocomplete md-selected-item="item.conn_key" md-search-text="searchText" md-items="item in querySearch(searchText)" md-item-text="item.conn_key" placeholder="Search for connection key">
+                      <span md-highlight-text="searchText">{{item.conn_key}}</span>
                     </md-autocomplete>
+
                     <md-chip-template>
                       <span>
-                        <strong>{{$chip}}</strong>
+                        <strong>{{$chip.conn_key}}</strong>
                       </span>
                     </md-chip-template>
                   </md-chips>
                 </div>
-
               </div>
               <div layout = "column" flex>
                 <md-card>
@@ -214,7 +214,7 @@
                   <div>
                   </div>
                   <br/>
-                  <div ng-show="uploader.isHTML5">
+                  <div ng-show="patternUploader.isHTML5">
                       <div nv-file-drop="" uploader="patternUploader" >
                         <div class="well my-drop-zone" nv-file-over="" uploader="patternUploader">
                           Files drop zone
@@ -224,7 +224,7 @@
                   <br/>
                   <div class="col-md-3" flex>
                     Single
-                    <input type="file" nv-file-select="" uploader="patternUploader" /><br/>
+                    <input type="file" nv-file-select="" uploader="patternUploader"/><br/>
                   </div>
               </md-card-content>
             </md-card>
@@ -240,11 +240,11 @@
                 <md-autocomplete
                   ng-disabled="false"
                   md-no-cache="true"
-                  md-selected-item="selectedConnKey"
-                  md-search-text-change="searchTextChange(searchText)"
-                  md-search-text="searchText"
+                  md-selected-item="selectedConnKey_new"
+                  md-search-text-change="searchTextChange(searchText_new)"
+                  md-search-text="searchText_new"
                   md-selected-item-change="selectedConnKeyChange(item)"
-                  md-items="item in querySearch(searchText)"
+                  md-items="item in querySearch(searchText_new)"
                   md-item-text="item.conn_key"
                   md-min-length="0"
                   placeholder="Pick an Connection Key"

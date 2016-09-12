@@ -185,7 +185,6 @@ def getpatterntype():
   result = obj.get_pattern_type(SYS_COLLECTION_NAME)
   return jsonify({'status': result})
 
-
 @app.route('/checkPatternTextFile', methods=['GET', 'POST'])
 def checkpatterntextfile():
   logging.info('API: /checkPatternTextFile, method: checkpatterntextfile()')
@@ -196,7 +195,21 @@ def checkpatterntextfile():
     txtContent = file.read()
     return jsonify({'status': txtContent})
 
+@app.route('/checkPatternAttachedFile', methods=['GET', 'POST'])
+def checkpatternattachedfile():
+  logging.info('API: /checkPatternAttachedFile, method: checkpatternattachedfile()')
+  if request.method == 'POST':
+    file = request.files['file']
 
+    file_name = file.filename
+    if file_name.split('.')[1] == 'json':
+      json_content = json.load(file)
+      format_status = True
+
+      if len(json_content) == 1:
+        key = json_content.keys()[0]
+
+    return jsonify({'status': key})
 
 if __name__ == "__main__":
   # logging.config.fileConfig('logging.conf')

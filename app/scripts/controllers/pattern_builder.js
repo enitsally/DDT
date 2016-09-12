@@ -13,12 +13,15 @@ angular.module('ddtApp')
     };
 
     $scope.ShownPeriod = "3";
-    $scope.selectedConnItem = null;
-    $scope.selectedConnKey = '';
+    $scope.selectedConnKey = [];
     $scope.searchText = '';
     $scope.showPopover=false;
 
+    $scope.selectedConnKey_new = '';
+    $scope.searchText_new = '';
+
     $scope.pattern_type = [];
+    $scope.patternText = 'Pattern Text showed Here.'
 
     var todayDate = new Date();
     $scope.maxDate = new Date(
@@ -66,9 +69,9 @@ angular.module('ddtApp')
 
     $scope.patternUploader = new FileUploader({
       url: 'http://localhost:5000/checkPatternTextFile',
+      autoUpload : true,
       queueLimit: 1
-    }
-    );
+    });
 
     $scope.uploader = new FileUploader({
       url:'http://localhost:5000/checkPatternAttachedFile',
@@ -95,6 +98,20 @@ angular.module('ddtApp')
 
     $scope.patternUploader.onSuccessItem  = function(item, response){
       $scope.patternText = response.status ;
+    };
+
+    $scope.uploader.onSuccessItem  = function(item, response){
+      //item.formData.push({format:response.status.format, conn: response.status.conn, msg: response.status.error_msg, conn_key: response.status.conn_key, key_exist: response.status.key_exist});
+      if (response.status.format === true && response.status.conn === true){
+        var tmp  = {
+          file_name: response.status.file_name,
+          file_id : response.status.file_id,
+          file_size : item.file.size,
+          conn_key : response.status.conn_key,
+          key_exist : response.status.key_exist
+        };
+      } ;
+
     };
 
 
@@ -147,7 +164,6 @@ angular.module('ddtApp')
     });
 
     $scope.querySearch  = function(query) {
-      console.log(query);
       var results = query ? $scope.conn_keys_respo.filter( createFilterFor(query) ) : $scope.conn_keys_respo,
           deferred;
       // var simulateQuery = false;
@@ -158,8 +174,14 @@ angular.module('ddtApp')
       // } else {
       //   return results;
       // }
-      console.log(results);
       return results;
+    };
+
+    $scope.transformChip = function (chip){
+      if (angular.isObject(chip)) {
+        return chip;
+      }
+
     };
 
     $scope.searchTextChange = function(text) {
