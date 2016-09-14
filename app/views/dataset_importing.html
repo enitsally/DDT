@@ -26,8 +26,8 @@
         position: absolute;
         left: 100%;
         top: 0;
-        display: block;
-        padding: 0 20px;
+        display: block;;
+        padding: 0 120px;
     }
 
     .popover span {
@@ -108,7 +108,7 @@
                         </tr>
                         <tr ng-repeat="conn in connInfo">
                           <td>{{conn.conn_key}}</td>
-                          <td>{{conn.desc | limitTo:20}} <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">...<div class="popover" ng-show="showPopover"><span>{{conn.desc}}</span></div></a></td>
+                          <td>{{conn.desc | limitTo:20}} <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">...<div data-toggle="tooltip" ng-show="showPopover">{{conn.desc}}</div></a></td>
                           <td>{{conn.version}}</td>
                           <td>{{conn.updated_date}}</td>
                           <td>{{conn.file_name}}</td>

@@ -4,6 +4,7 @@
 angular.module('ddtApp')
   .controller('datasetImportingCtrl', function ($scope, $http, $state, $mdDialog, $mdToast, $mdMedia,FileUploader, $window) {
 
+    $scope.customFullscreen = false;
     $scope.showPopover=false;
     $scope.mapped = false;
     $scope.selectedConnItem = null;

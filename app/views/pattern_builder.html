@@ -1,19 +1,5 @@
 
 <style>
-    .popover {
-        text-decoration: none;
-        color: LightGray;
-        position: absolute;
-        left: 100%;
-        top: 0;
-        display: block;
-        padding: 0 20px;
-    }
-
-    .popover span {
-        display: block;
-        font-weight: 200;
-    }
     .my-drop-zone { border: dotted 3px lightgray; }
     .nv-file-over { border: dotted 3px red; } /* Default class applied to drop zones on over */
     .another-file-over-class { border: dotted 3px green; }
@@ -28,23 +14,49 @@
     .checkboxdemoSyncing fieldset.standard {  border-style: solid;
                                               border-width: 1px;
                                               height: 100%; }
-    .autocompletedemoCustomTemplate .autocomplete-custom-template li {
-        border-bottom: 1px solid #ccc;
-        height: auto;
-        padding-top: 8px;
-        padding-bottom: 8px;
-        white-space: normal; }
-    .autocompletedemoCustomTemplate .autocomplete-custom-template li:last-child {
-        border-bottom-width: 0; }
+    .autocomplete-custom-template li {
+      border-bottom: 1px solid #ccc;
+      height: auto;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      white-space: normal; }
 
-    .autocompletedemoCustomTemplate .autocomplete-custom-template .item-title,
-    .autocompletedemoCustomTemplate .autocomplete-custom-template .item-metadata {
-        display: block;
-        line-height: 2; }
+    .autocomplete-custom-template li:last-child {
+      border-bottom-width: 0; }
 
-    .autocompletedemoCustomTemplate .autocomplete-custom-template .item-title md-icon {
-        height: 18px;
-        width: 18px; }
+    .autocomplete-custom-template .item-title,
+    .autocomplete-custom-template .item-metadata {
+      display: block;
+      line-height: 2; }
+
+    .autocomplete-custom-template .item-title md-icon {
+      height: 18px;
+      width: 18px; }
+
+    .checkboxdemoSyncing .checkboxDemo1 div {
+      clear: both; }
+
+    .checkboxdemoSyncing legend {
+      color: #3F51B5; }
+
+    .checkboxdemoSyncing legend code {
+      color: #3F51B5;
+      font-weight: normal; }
+
+    .checkboxdemoSyncing p {
+      padding-left: 8px; }
+
+    .checkboxdemoSyncing .info {
+      padding-left: 13px; }
+
+    .checkboxdemoSyncing div.standard {
+      padding: 8px;
+      padding-left: 15px; }
+
+    .checkboxdemoSyncing fieldset.standard {
+      border-style: solid;
+      border-width: 1px;
+      height: 100%; }
 
     html, body { height: 100%; }
     table, th , td {
@@ -64,20 +76,7 @@
     position: relative;
     }
 
-    .popover {
-        text-decoration: none;
-        color: LightGray;
-        position: absolute;
-        left: 100%;
-        top: 0;
-        display: block;
-        padding: 0 20px;
-    }
 
-    .popover span {
-        display: block;
-        font-weight: 200;
-    }
 
 </style>
 
@@ -97,7 +96,7 @@
   </form>
 </div>
 <div layout="column" ng-cloak="">
-  <md-contentclass="md-padding" layout="row">
+  <md-content class="md-padding" layout="row">
     <div flex="5"></div>
     <form flex="90">
       <md-tabs md-dynamic-height md-border-bottom >
@@ -181,7 +180,7 @@
                         </tr>
                         <tr ng-repeat="conn in connInfo">
                           <td>{{conn.conn_key}}</td>
-                          <td>{{conn.desc | limitTo:20}} <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">...<div class="popover" ng-show="showPopover"><span>{{conn.desc}}</span></div></a></td>
+                          <td>{{conn.desc | limitTo:20}} <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">...<div data-toggle="tooltip" ng-show="showPopover">{{conn.desc}}</div></a></td>
                           <td>{{conn.version}}</td>
                           <td>{{conn.updated_date}}</td>
                           <td>{{conn.file_name}}</td>
@@ -231,36 +230,70 @@
             <md-card flex = "50">
               <md-card-content layout = "column">
                 Pattern Text:
-                <textarea ng-model="patternText" style = "height:250px; overflow:scroll;"></textarea>
+                <textarea ng-model="newcreation.pattern_text" style = "height:250px; overflow:scroll;"></textarea>
+                <br/>
+                <div layout = "row">
+                  <md-button class="md-primary md-hue-1" ng-click="doClearText()">Clear</md-button>
+                  <span flex></span>
+                  <md-button class="md-accent" ng-click="doAttachFiles()">Attach</md-button>
+
+                </div>
               </md-card-content>
             </md-card>
-            <md-card>
+            <md-card flex = "20">
               <md-card-content layout = "column">
-                Connection ID:
-                <md-autocomplete
-                  ng-disabled="false"
-                  md-no-cache="true"
-                  md-selected-item="selectedConnKey_new"
-                  md-search-text-change="searchTextChange(searchText_new)"
-                  md-search-text="searchText_new"
-                  md-selected-item-change="selectedConnKeyChange(item)"
-                  md-items="item in querySearch(searchText_new)"
-                  md-item-text="item.conn_key"
-                  md-min-length="0"
-                  placeholder="Pick an Connection Key"
-                  md-menu-class="autocomplete-custom-template">
-                  <md-item-template>
-                    <span class="item-title">
-                      <md-icon md-svg-icon="images/icon/octicon-repo.svg"></md-icon>
-                        <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">{{item.conn_key}}<div class="popover" ng-show="showPopover"><span flex>{{item.desc}}</span></div></a>
-                    </span>
-                  </md-item-template>
-                </md-autocomplete>
+                <div>
+                  Pattern Type:
+                  <md-radio-group ng-model="newcreation.pattern_type" class="md-primary">
+                     <md-radio-button ng-repeat="d in pattern_type"
+                                      ng-value="d"
+                                      ng-class="{'md-align-top-left': $index==1}" >
+                         {{ d }}<br/>
+                     </md-radio-button>
+                   </md-radio-group>
+                </div>
+                <br/>
+                <div>
+                    Connection ID:
+                    <md-autocomplete
+                      ng-disabled="false"
+                      md-no-cache="true"
+                      md-selected-item="newcreation.conn_key"
+                      md-search-text-change="searchTextChange(searchText_new)"
+                      md-search-text="searchText_new"
+                      md-selected-item-change="selectedConnKeyChange(item)"
+                      md-items="item in querySearch(searchText_new)"
+                      md-item-text="item.conn_key"
+                      md-min-length="0"
+                      placeholder="Pick an Connection ID"
+                      md-menu-class="autocomplete-custom-template">
+                      <md-item-template>
+                        <span class="item-title">
+                          <md-icon md-svg-icon="images/icon/octicon-repo.svg"></md-icon>
+                            <!-- <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">{{item.conn_key}}<div data-toggle="tooltip" ng-show="showPopover">{{item.desc}}</div></a> -->
+                            <span>{{item.conn_key}}</span>
+                        </span>
+
+                        <span class="item-metadata">
+                           <span class="item-metastat">
+                             <p style="font-size:10px">{{item.desc}}</p>
+                           </span>
+                         </span>
+                      </md-item-template>
+                    </md-autocomplete>
+                  </div>
+                  <br/>
+                  <div>
+                    Pattern Description:
+                    <md-input-container md-no-float class="md-block">
+                      <input ng-model="newcreation.pattern_descr" placeholder="Pattern Description">
+                    </md-input-container>
+                  </div>
               </md-card-content>
             </md-card>
 
           </div>
-          <div layout = "row">
+          <!-- <div layout = "row">
             <md-card flex = "20">
               <md-card-content layout="column">
                   <h3>Select attachments</h3> (Only text files are accepted)
@@ -349,8 +382,7 @@
                 </div>
               </md-card-content>
             </md-card>
-          </div>
-
+          </div> -->
         </md-tab>
       </md-tabs>
     </form>

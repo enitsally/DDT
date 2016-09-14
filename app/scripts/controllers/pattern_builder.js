@@ -2,14 +2,24 @@
 
 
 angular.module('ddtApp')
-  .controller('patternBuilderCtrl', function ($log, $timeout, $q, $scope, $rootScope, $http, $state, $mdToast, FileUploader, AUTH_EVENTS, AuthService, IdleService) {
+  .controller('patternBuilderCtrl', function ($log, $timeout, $q, $scope, $rootScope, $http, $state, $mdToast,$mdMedia,$mdDialog, FileUploader, AUTH_EVENTS, AuthService, IdleService) {
 
+    $scope.customFullscreen = false;
     $scope.search = {
       exp_user : $scope.currentUser ? $scope.currentUser.id : '',
       start_date:'',
       end_date:'',
       conn_keys:[],
       pattern_selected: []
+    };
+
+    $scope.newcreation = {
+      pattern_text : '',
+      pattern_type : '',
+      conn_key : '',
+      pattern_descr: '',
+      user_open_list : [],
+      extended_func_list : []
     };
 
     $scope.ShownPeriod = "3";
@@ -21,7 +31,7 @@ angular.module('ddtApp')
     $scope.searchText_new = '';
 
     $scope.pattern_type = [];
-    $scope.patternText = 'Pattern Text showed Here.'
+
 
     var todayDate = new Date();
     $scope.maxDate = new Date(
@@ -30,6 +40,51 @@ angular.module('ddtApp')
       todayDate.getDate() + 1
     );
     // var originalsubExpList = [];
+
+    $scope.doResetInput = function(){
+      $scope.newcreation.pattern_text = '';
+      $scope.newcreation.pattern_type = '';
+      $scope.newcreation.conn_key = '';
+      $scope.newcreation.pattern_descr = '';
+      $scope.newcreation.user_open_list = [];
+      $scope.newcreation.extended_func_list = [];
+
+      $scope.patternUploader.clearQueue();
+    };
+
+    $scope.doClearText = function(){
+      $scope.newcreation.pattern_text = '';
+      $scope.patternUploader.clearQueue();
+    };
+
+    $scope.doAttachFiles = function(){
+      var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+      $mdDialog.show({
+            controller: DialogController,
+            templateUrl: 'views/dialog.attach.pattern.file.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose:false,
+            fullscreen: useFullScreen,
+            locals:{
+              result: $scope.newcreation
+            },
+            scope: $scope,
+            preserveScope: true
+          });
+    };
+
+    function DialogController($scope, $mdDialog, result) {
+      $scope.save_result = result;
+      $scope.hide = function() {
+        $mdDialog.hide();
+      };
+      $scope.cancel = function() {
+        $mdDialog.cancel();
+      };
+      $scope.answer = function(answer) {
+        $mdDialog.hide(answer);
+      };
+  };
 
     $scope.onlyLaterDate = function (date) {
       var day = date;
@@ -70,6 +125,7 @@ angular.module('ddtApp')
     $scope.patternUploader = new FileUploader({
       url: 'http://localhost:5000/checkPatternTextFile',
       autoUpload : true,
+      removeAfterUpload : true,
       queueLimit: 1
     });
 
@@ -97,7 +153,7 @@ angular.module('ddtApp')
     });
 
     $scope.patternUploader.onSuccessItem  = function(item, response){
-      $scope.patternText = response.status ;
+      $scope.newcreation.pattern_text = response.status ;
     };
 
     $scope.uploader.onSuccessItem  = function(item, response){
