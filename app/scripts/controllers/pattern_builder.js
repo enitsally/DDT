@@ -44,10 +44,11 @@ angular.module('ddtApp')
     $scope.doResetInput = function(){
       $scope.newcreation.pattern_text = '';
       $scope.newcreation.pattern_type = '';
-      $scope.newcreation.conn_key = '';
+      $scope.newcreation.conn_key = undefined;
       $scope.newcreation.pattern_descr = '';
       $scope.newcreation.user_open_list = [];
       $scope.newcreation.extended_func_list = [];
+      $scope.searchText_new = '';
 
       $scope.patternUploader.clearQueue();
     };
