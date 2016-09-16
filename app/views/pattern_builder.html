@@ -235,7 +235,9 @@
                 <div layout = "row">
                   <md-button class="md-primary md-hue-1" ng-click="doClearText()">Clear</md-button>
                   <span flex></span>
-                  <md-button class="md-accent" ng-click="doAttachFiles()">Attach</md-button>
+                  <md-button class="md-accent" ng-click="doAttachUserGroup()">User Groups ({{newcreation.user_open_list.length}})</md-button>
+                  <md-button class="md-accent" ng-click="doAttachExtension()">Extensions ({{newcreation.extended_func_list.length}})</md-button>
+                  <md-button class="md-accent" ng-click="doAttachFiles()">Attach ({{newcreation.attach_list.length}})</md-button>
 
                 </div>
               </md-card-content>

@@ -1,0 +1,44 @@
+<md-dialog aria-label="Query Pattern User Assignment">
+
+
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Assign Users to Query Pattern: <code>{{save_result.pattern_descr}}</code></h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon md-svg-src="images/icon/close.svg" aria-label="Close dialog"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+
+      <form ng-submit="$event.userPreventDefault()">
+        <md-autocomplete id="userAc"
+                         md-selected-item="save_result.user_open_list"
+                         md-search-text="searchUser"
+                         md-selected-item-change="selectedUserChange(item)"
+                         md-items="item in querySearchUser(searchUser)"
+                         md-item-text="item.name"
+                         md-min-length="0"
+                         md-no-cache="true"
+                         placeholder="Add User or Group...">
+          <md-item-template>
+            <span md-highlight-text="searchUser" md-highlight-flags="^i">{{item.name}}  ({{item.type}})</span>
+          </md-item-template>
+          <md-not-found>
+            No contact matching "{{searchUser}}" was found.
+          </md-not-found>
+        </md-autocomplete>
+        <h2>Currently Selected User or Group</h2>
+        {{save_result.user_open_list}}
+        {{user_list}}
+        <md-card>
+          <md-card-content>
+            <p ng-repeat="user in newcreation.user_open_list">{{user.name}} ({{user.type}})</p>
+          </md-card-content>
+        </md-card>
+    </form>
+
+    </md-dialog-content>
+</md-dialog>

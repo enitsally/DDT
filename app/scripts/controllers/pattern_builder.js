@@ -2,7 +2,7 @@
 
 
 angular.module('ddtApp')
-  .controller('patternBuilderCtrl', function ($log, $timeout, $q, $scope, $rootScope, $http, $state, $mdToast,$mdMedia,$mdDialog, FileUploader, AUTH_EVENTS, AuthService, IdleService) {
+  .controller('patternBuilderCtrl', function ($log, $filter, $timeout, $q, $scope, $rootScope, $http, $state, $mdToast,$mdMedia,$mdDialog, FileUploader, AUTH_EVENTS, AuthService, IdleService) {
 
     $scope.customFullscreen = false;
     $scope.search = {
@@ -14,12 +14,14 @@ angular.module('ddtApp')
     };
 
     $scope.newcreation = {
+      exp_user : $scope.currentUser ? $scope.currentUser.id : '',
       pattern_text : '',
       pattern_type : '',
       conn_key : '',
       pattern_descr: '',
       user_open_list : [],
-      extended_func_list : []
+      extended_func_list : [],
+      attach_list: []
     };
 
     $scope.ShownPeriod = "3";
@@ -73,6 +75,39 @@ angular.module('ddtApp')
             preserveScope: true
           });
     };
+
+    $scope.doAttachUserGroup = function(){
+
+      var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+      $mdDialog.show({
+            controller: DialogControllerUser,
+            templateUrl: 'views/dialog.assign.pattern.users.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose:false,
+            fullscreen: useFullScreen,
+            locals:{
+              result: $scope.newcreation,
+              user: $scope.user_respo
+            },
+            scope: $scope,
+            preserveScope: true
+          });
+
+    };
+
+    function DialogControllerUser($scope, $mdDialog, result, user) {
+      $scope.save_result = result;
+      $scope.user_list = user;
+      $scope.hide = function() {
+        $mdDialog.hide();
+      };
+      $scope.cancel = function() {
+        $mdDialog.cancel();
+      };
+      $scope.answer = function(answer) {
+        $mdDialog.hide(answer);
+      };
+  };
 
     function DialogController($scope, $mdDialog, result) {
       $scope.save_result = result;
@@ -220,6 +255,12 @@ angular.module('ddtApp')
 
     });
 
+    $http.get('http://localhost:5000/getSystemUser').then(function (response){
+      $scope.user_respo = response.data.status;
+    }, function(){
+
+    });
+
     $scope.querySearch  = function(query) {
       var results = query ? $scope.conn_keys_respo.filter( createFilterFor(query) ) : $scope.conn_keys_respo,
           deferred;
@@ -256,6 +297,48 @@ angular.module('ddtApp')
         return (item.conn_key.indexOf(uppercaseQuery) === 0);
       };
 
+    };
+
+    function querySearchUser(query){
+
+      var results = query ? $scope.user_respo.filter( createFilterForUser(query) ) : [];
+      return results;
+
+
+        //////
+
+      };
+
+      function createFilterForUser(query) {
+        var uppercaseQuery = angular.uppercase(query);
+
+        return function filterFn(item) {
+          return (item.name.indexOf(uppercaseQuery) === 0);
+        };
+
+      };
+
+    function selectedUserChange(item){
+      $log.info('User changed to' + JSON.stringify(item));
+      if(item)
+      {
+        if($filter('filter')($scope.newcreation.user_open_list, function (d) {return d.name === item.name;})[0])
+          {
+            $log.info('Item already selected. Will not add it again.');
+          }
+        else
+          {
+            //add id to object
+            $scope.newcreation.user_open_list.push(item);
+          }
+        // clear search field
+        $scope.searchUser= '';
+        $scope.selectedUser = undefined;
+
+        //somehow blur the autocomplete focus
+        //$mdAutocompleteCtrl.blur();
+        document.getElementById("userAc").blur();
+      }
     };
 
 

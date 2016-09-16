@@ -15,6 +15,7 @@ import logging.config
 CON_COLLECTION_NAME = 'connection'
 MD_COLLECTION_NAME = 'meta_data'
 USER_COLLECTION_NAME = 'sys_users'
+USER_GROUP_COLLECTION_NAME = 'sys_users_group'
 SYS_COLLECTION_NAME = 'sys_conf'
 
 app = Flask(__name__, static_url_path='')
@@ -210,6 +211,13 @@ def checkpatternattachedfile():
         key = json_content.keys()[0]
 
     return jsonify({'status': key})
+
+@app.route('/getSystemUser',methods=['GET','POST'])
+def getsystemuser():
+  logging.info('API: /getSystemUser, method: getsystemuser()')
+  result = obj.get_user_usergroup_list(USER_COLLECTION_NAME, USER_GROUP_COLLECTION_NAME)
+  return jsonify({'status': result})
+
 
 if __name__ == "__main__":
   # logging.config.fileConfig('logging.conf')

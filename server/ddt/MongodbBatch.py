@@ -322,16 +322,30 @@ class mongodbbatch:
     patter_type = self.db[sys_collection_name].find_one({'pattern_type':{'$exists': True}})
     result = patter_type.get('pattern_type')
     return result
+
+  def get_user_usergroup_list(self, sys_user, sys_user_group):
+    result = []
+    user_list = list(self.db[sys_user].find({}, {'_id': 0, 'user_name': 1}))
+    user_group_list = list(self.db[sys_user_group].find({}, {'_id': 0, 'group_name': 1}))
+    for user in user_list:
+      tmp = {"name": user.get('user_name'), "type": "User"}
+      result.append(tmp)
+
+    for user_group in user_group_list:
+      tmp = {"name": user_group.get('group_name'), "type": "Group"}
+      result.append(tmp)
+
+    return result
+
+
 #
 # def main():
 #     obj = mongodbbatch(host="172.18.60.20", port="27017", db="DDDB")
 #     fs = gridfs.GridFS(obj.get_db())
 #     object_ID = ObjectId("57ae345863dc2e0b24e90653")
-#     data_file = json.load(fs.get(object_ID))
-#     print data_file
-#     # for a in json_data:
-#     #   print a
-#     # print json_data
+#     temp = obj.get_user_usergroup_list("sys_users", "sys_users_group")
+#
+#     print temp
 #
 #
 #
