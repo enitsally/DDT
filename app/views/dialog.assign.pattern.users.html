@@ -1,9 +1,9 @@
-<md-dialog aria-label="Query Pattern User Assignment">
+<md-dialog aria-label="Query Pattern User Assignment" flex = "45">
 
 
     <md-toolbar>
       <div class="md-toolbar-tools">
-        <h2>Assign Users to Query Pattern: <code>{{save_result.pattern_descr}}</code></h2>
+        <h2>Assign Users to Query Pattern: <code>{{newcreation.pattern_descr}}</code></h2>
         <span flex></span>
         <md-button class="md-icon-button" ng-click="cancel()">
           <md-icon md-svg-src="images/icon/close.svg" aria-label="Close dialog"></md-icon>
@@ -13,8 +13,8 @@
 
     <md-dialog-content>
 
-      <form ng-submit="$event.userPreventDefault()">
-        <md-autocomplete id="userAc"
+
+        <!-- <md-autocomplete id="userAc"
                          md-selected-item="save_result.user_open_list"
                          md-search-text="searchUser"
                          md-selected-item-change="selectedUserChange(item)"
@@ -29,16 +29,30 @@
           <md-not-found>
             No contact matching "{{searchUser}}" was found.
           </md-not-found>
-        </md-autocomplete>
-        <h2>Currently Selected User or Group</h2>
-        {{save_result.user_open_list}}
-        {{user_list}}
+        </md-autocomplete> -->
+        <md-chips ng-model="newcreation.user_open_list" md-autocomplete-snap="" md-transform-chip="transformChip($chip.name)" md-require-match="true">
+          <md-autocomplete md-selected-item="selectedItem" md-search-text="searchUser" md-items="item in querySearchUser(searchUser)" md-item-text="item.name" placeholder="Search for User/Group.">
+            <span md-highlight-text="searchUser">{{item.name}} :: {{item.type}}</span>
+          </md-autocomplete>
+          <md-chip-template>
+            <span>
+              <strong>{{$chip.name}}</strong>
+            </span>
+          </md-chip-template>
+        </md-chips>
+
+
+        <h4>Currently Selected User or Group</h4>
         <md-card>
           <md-card-content>
             <p ng-repeat="user in newcreation.user_open_list">{{user.name}} ({{user.type}})</p>
           </md-card-content>
         </md-card>
-    </form>
+
+        <div>
+          <md-button class="md-primary md-hue-1" ng-click="doClearUser()">Clear</md-button>
+        </div
+
 
     </md-dialog-content>
 </md-dialog>

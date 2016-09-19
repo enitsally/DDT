@@ -202,6 +202,16 @@ angular.module('ddtApp')
       $scope.selectedConnKey = [];
       $scope.onShowPeriodChanged();
 
+      $scope.fulllist = [];
+
+      $http.get('http://localhost:5000/getConnectionShort').then(function (response){
+        $scope.fulllist = response.data.status;
+      }, function(){
+
+      });
+
+
+
     };
 
     $scope.setIndex = function (index){
@@ -269,6 +279,7 @@ angular.module('ddtApp')
             $scope.onShowPeriodChanged();
             $scope.uploader.clearQueue();
             $scope.file_log = [];
+            $scope.doResetInput();
 
           }, function (){
         });
@@ -343,6 +354,8 @@ angular.module('ddtApp')
 
         });
 
+        $scope.doResetInput();
+
       }, function() {
         //Cancal Upload
       });
@@ -390,6 +403,7 @@ angular.module('ddtApp')
             scope: $scope,
             preserveScope: true
           });
+      $scope.doResetInput();
     };
 
 

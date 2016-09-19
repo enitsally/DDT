@@ -87,8 +87,8 @@
   <form flex = "90" layout = "row">
     <span class="md-headline">Pattern Builder</span>
     <span flex></span>
-    <md-button class="md-primary md-raised" ng-click="doSearchDataSet()">Search</md-button>
-    <md-button class="md-primary md-raised" ng-click="doSaveDataSet()">Save</md-button>
+    <md-button class="md-primary md-raised" ng-click="doSearchPattern()">Search</md-button>
+    <md-button class="md-primary md-raised" ng-click="doSavePattern()">Save</md-button>
       <div layout="row" layout-align="end center">
         <span flex></span>
         <md-button ng-click="doResetInput()">Reset</md-button>
@@ -135,7 +135,7 @@
                   <md-datepicker ng-model="search.end_date" md-date-filter="onlyLaterDate" md-max-date="maxDate" md-placeholder="Enter End date"></md-datepicker>
                   <span flex></span>
                   <md-chips ng-model="selectedConnKey" md-autocomplete-snap="" md-transform-chip="transformChip($chip.conn_key)" md-require-match="true">
-                    <md-autocomplete md-selected-item="item.conn_key" md-search-text="searchText" md-items="item in querySearch(searchText)" md-item-text="item.conn_key" placeholder="Search for connection key">
+                    <md-autocomplete md-selected-item="selectedItem" md-search-text="searchText" md-items="item in querySearch(searchText)" md-item-text="item.conn_key" placeholder="Search for connection key">
                       <span md-highlight-text="searchText">{{item.conn_key}}</span>
                     </md-autocomplete>
 

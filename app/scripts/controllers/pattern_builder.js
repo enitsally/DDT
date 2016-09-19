@@ -30,7 +30,8 @@ angular.module('ddtApp')
     $scope.showPopover=false;
 
     $scope.selectedConnKey_new = '';
-    $scope.searchText_new = '';
+    //$scope.searchText_new = '';
+    //$scope.searchUser = null;
 
     $scope.pattern_type = [];
 
@@ -51,6 +52,7 @@ angular.module('ddtApp')
       $scope.newcreation.user_open_list = [];
       $scope.newcreation.extended_func_list = [];
       $scope.searchText_new = '';
+      $scope.searchUser = '';
 
       $scope.patternUploader.clearQueue();
     };
@@ -58,6 +60,10 @@ angular.module('ddtApp')
     $scope.doClearText = function(){
       $scope.newcreation.pattern_text = '';
       $scope.patternUploader.clearQueue();
+    };
+
+    $scope.doClearUser = function(){
+      $scope.newcreation.user_open_list = [];
     };
 
     $scope.doAttachFiles = function(){
@@ -80,14 +86,16 @@ angular.module('ddtApp')
 
       var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
       $mdDialog.show({
-            controller: DialogControllerUser,
+            controller: DialogController,
             templateUrl: 'views/dialog.assign.pattern.users.html',
             parent: angular.element(document.body),
             clickOutsideToClose:false,
             fullscreen: useFullScreen,
             locals:{
-              result: $scope.newcreation,
-              user: $scope.user_respo
+              result: $scope.newcreation
+              // user: $scope.user_respo,
+              // searchuser: $scope.searchUser,
+              // selecteduser: $scope.selectedUser
             },
             scope: $scope,
             preserveScope: true
@@ -95,19 +103,6 @@ angular.module('ddtApp')
 
     };
 
-    function DialogControllerUser($scope, $mdDialog, result, user) {
-      $scope.save_result = result;
-      $scope.user_list = user;
-      $scope.hide = function() {
-        $mdDialog.hide();
-      };
-      $scope.cancel = function() {
-        $mdDialog.cancel();
-      };
-      $scope.answer = function(answer) {
-        $mdDialog.hide(answer);
-      };
-  };
 
     function DialogController($scope, $mdDialog, result) {
       $scope.save_result = result;
@@ -261,6 +256,11 @@ angular.module('ddtApp')
 
     });
 
+
+    $scope.doSavePattern = function(){
+      
+    }
+
     $scope.querySearch  = function(query) {
       var results = query ? $scope.conn_keys_respo.filter( createFilterFor(query) ) : $scope.conn_keys_respo,
           deferred;
@@ -273,6 +273,12 @@ angular.module('ddtApp')
       //   return results;
       // }
       return results;
+    };
+
+    $scope.querySearchUser = function(query){
+        var results = query ? $scope.user_respo.filter( createFilterForUser(query)) : $scope.user_respo,
+          deferred
+        return results;
     };
 
     $scope.transformChip = function (chip){
@@ -299,47 +305,16 @@ angular.module('ddtApp')
 
     };
 
-    function querySearchUser(query){
-
-      var results = query ? $scope.user_respo.filter( createFilterForUser(query) ) : [];
-      return results;
-
-
-        //////
-
+    function createFilterForUser(query) {
+      var lowercaseQuery = angular.lowercase(query);
+      return function filterFnUser(user) {
+        return (user.name.toLowerCase().indexOf(lowercaseQuery) === 0);
       };
 
-      function createFilterForUser(query) {
-        var uppercaseQuery = angular.uppercase(query);
-
-        return function filterFn(item) {
-          return (item.name.indexOf(uppercaseQuery) === 0);
-        };
-
-      };
-
-    function selectedUserChange(item){
-      $log.info('User changed to' + JSON.stringify(item));
-      if(item)
-      {
-        if($filter('filter')($scope.newcreation.user_open_list, function (d) {return d.name === item.name;})[0])
-          {
-            $log.info('Item already selected. Will not add it again.');
-          }
-        else
-          {
-            //add id to object
-            $scope.newcreation.user_open_list.push(item);
-          }
-        // clear search field
-        $scope.searchUser= '';
-        $scope.selectedUser = undefined;
-
-        //somehow blur the autocomplete focus
-        //$mdAutocompleteCtrl.blur();
-        document.getElementById("userAc").blur();
-      }
     };
+
+
+
 
 
 });
