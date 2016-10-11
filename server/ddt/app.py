@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, session, render_template, redirect
-from flask.ext.cors import CORS, cross_origin
+from flask_cors import CORS, cross_origin
 from MongodbBatch import mongodbbatch
 from DBFactory import Connector
 from datetime import datetime
@@ -201,16 +201,19 @@ def checkpatternattachedfile():
   logging.info('API: /checkPatternAttachedFile, method: checkpatternattachedfile()')
   if request.method == 'POST':
     file = request.files['file']
+    file_descr = request.form['descr']
 
     file_name = file.filename
-    if file_name.split('.')[1] == 'json':
-      json_content = json.load(file)
-      format_status = True
+    file_id = obj.upload_temp(file)
 
-      if len(json_content) == 1:
-        key = json_content.keys()[0]
+    if file_id is not None:
+        return jsonify({'status': True, 'descr': str(file_descr), 'fileName': file_name, 'objectId': str(file_id)})
+    else:
+        return jsonify({'status': False, 'descr': str(file_descr), 'fileName': file_name, 'objectId': None})
 
-    return jsonify({'status': key})
+
+
+
 
 @app.route('/getSystemUser',methods=['GET','POST'])
 def getsystemuser():

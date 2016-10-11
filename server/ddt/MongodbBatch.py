@@ -203,6 +203,21 @@ class mongodbbatch:
     file_id = fs.put(tempFile)
     return file_id
 
+  def delete_temp(self, file_id):
+    object_ID = ObjectId(file_id)
+    fs = gridfs.GridFS(self.db)
+    try:
+      fs.delete(object_ID)
+      message = "Delete succeed."
+      status = True
+
+    except pymongo.errors.OperationFailure as e:
+      logging.error(e.details.get('errmsg'))
+      message = e
+      status = False
+    return status
+
+
   def check_connection_exit(self, connection_collection_name, conn_key):
 
     check = self.db[connection_collection_name].find_one({conn_key: {'$exists': True}})

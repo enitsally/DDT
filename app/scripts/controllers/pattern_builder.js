@@ -160,44 +160,44 @@ angular.module('ddtApp')
       queueLimit: 1
     });
 
-    $scope.uploader = new FileUploader({
+    $scope.attachmentUploader = new FileUploader({
       url:'http://localhost:5000/checkPatternAttachedFile',
       queueLimit: 20
     });
 
-    $scope.patternUploader.filters.push({
-      name:'txtFilter',
-      fn: function(item, options){
-        var name = item.name.split(".")[0]
-        var type = item.name.split(".")[1];
-        return 'txt'=== type;
-      }
-    });
-
-    $scope.uploader.filters.push({
-      name:'txtFilter',
-      fn: function(item, options){
-        var name = item.name.split(".")[0]
-        var type = item.name.split(".")[1];
-        return 'txt'=== type;
-      }
-    });
+    // $scope.patternUploader.filters.push({
+    //   name:'txtFilter',
+    //   fn: function(item, options){
+    //     var name = item.name.split(".")[0]
+    //     var type = item.name.split(".")[1];
+    //     return 'txt'=== type;
+    //   }
+    // });
+    //
+    // $scope.uploader.filters.push({
+    //   name:'txtFilter',
+    //   fn: function(item, options){
+    //     var name = item.name.split(".")[0]
+    //     var type = item.name.split(".")[1];
+    //     return 'txt'=== type;
+    //   }
+    // });
 
     $scope.patternUploader.onSuccessItem  = function(item, response){
       $scope.newcreation.pattern_text = response.status ;
     };
 
-    $scope.uploader.onSuccessItem  = function(item, response){
-      //item.formData.push({format:response.status.format, conn: response.status.conn, msg: response.status.error_msg, conn_key: response.status.conn_key, key_exist: response.status.key_exist});
-      if (response.status.format === true && response.status.conn === true){
-        var tmp  = {
-          file_name: response.status.file_name,
-          file_id : response.status.file_id,
-          file_size : item.file.size,
-          conn_key : response.status.conn_key,
-          key_exist : response.status.key_exist
-        };
-      } ;
+    $scope.attachmentUploader.onSuccessItem  = function(item, response){
+      item.formData.push({descr : response.status.descr, objectId : response.status.objectId});
+      // if (response.status.format === true && response.status.conn === true){
+      //   var tmp  = {
+      //     file_name: response.status.file_name,
+      //     file_id : response.status.file_id,
+      //     file_size : item.file.size,
+      //     conn_key : response.status.conn_key,
+      //     key_exist : response.status.key_exist
+      //   };
+      // } ;
 
     };
 
@@ -258,7 +258,7 @@ angular.module('ddtApp')
 
 
     $scope.doSavePattern = function(){
-      
+
     }
 
     $scope.querySearch  = function(query) {
