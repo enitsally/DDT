@@ -14,7 +14,7 @@ angular.module('ddtApp')
     };
 
     $scope.newcreation = {
-      exp_user : $scope.currentUser ? $scope.currentUser.id : '',
+      creation_user : $scope.currentUser ? $scope.currentUser.id : '',
       pattern_text : '',
       pattern_type : '',
       conn_key : '',
@@ -65,6 +65,22 @@ angular.module('ddtApp')
     $scope.doClearUser = function(){
       $scope.newcreation.user_open_list = [];
     };
+
+    $scope.doClearAttach = function(){
+
+      for (var i = 0; i < $scope.newcreation.attach_list.length; i ++)
+      {
+        var attachId = $scope.newcreation.attach_list[i].file_id;
+        $http.post('http://localhost:5000/clearAllAttachFile', attachId).then(function(response){
+            console.log('delete file:'+ attachId + ', status: '+response.data.status);
+        }, function (){
+
+        });
+      };
+
+      $scope.newcreation.attach_list = [];
+      $scope.attachmentUploader.clearQueue();
+    }
 
     $scope.doAttachFiles = function(){
       var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
@@ -187,17 +203,43 @@ angular.module('ddtApp')
       $scope.newcreation.pattern_text = response.status ;
     };
 
+
     $scope.attachmentUploader.onSuccessItem  = function(item, response){
-      item.formData.push({descr : response.status.descr, objectId : response.status.objectId});
-      // if (response.status.format === true && response.status.conn === true){
-      //   var tmp  = {
-      //     file_name: response.status.file_name,
-      //     file_id : response.status.file_id,
-      //     file_size : item.file.size,
-      //     conn_key : response.status.conn_key,
-      //     key_exist : response.status.key_exist
-      //   };
-      // } ;
+      item.formData.push({descr : response.descr, objectId : response.objectId});
+
+      if (response.status === true){
+
+        var tmp  = {
+          file_name: item.file.name,
+          file_id : response.objectId,
+          file_size : item.file.size,
+          description: response.descr
+        };
+
+        $scope.newcreation.attach_list.push(tmp);
+
+      } ;
+
+    };
+
+    $scope.doRemoveItem = function(item){
+
+      for (var i = 0; i < $scope.newcreation.attach_list.length; i ++)
+      {
+        var attachId = $scope.newcreation.attach_list[i].file_id;
+        if (item.formData[1].objectId === attachId)
+        {
+          $http.post('http://localhost:5000/clearAllAttachFile', attachId).then(function(response){
+              console.log('delete file:'+ attachId + ', status: '+response.data.status);
+          }, function (){
+
+          });
+          $scope.newcreation.attach_list.splice(i,1);
+          break;
+        }
+      };
+      item.remove();
+
 
     };
 
@@ -258,7 +300,28 @@ angular.module('ddtApp')
 
 
     $scope.doSavePattern = function(){
+      $http.post('http://localhost:5000/saveQueryPattern', $scope.newcreation).then(function(response){
 
+        var pattern_id = response.data.status;
+        var message = "Save Pattern Failed!"
+        if (pattern_id !== undefined)
+        {
+          message = "Pattern Saved, Pattern ID : " + pattern_id
+        }
+        else {
+
+        }
+        $mdDialog.show(
+          $mdDialog.alert()
+            .parent(angular.element(document.querySelector('#popupContainer')))
+            .clickOutsideToClose(true)
+            .textContent(message)
+            .ok('Got it!')
+        );
+
+      }, function(){
+
+      });
     }
 
     $scope.querySearch  = function(query) {

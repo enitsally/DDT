@@ -352,15 +352,47 @@ class mongodbbatch:
 
     return result
 
+  def get_stored_file_id(self, sys_collection_name):
+    result = []
+    connection_file_id = list(self.db[sys_collection_name].find({}, {'_id': 0, 'file_id': 1}))
+    for file in connection_file_id:
+      result.append(str(file.get('file_id')))
 
-#
+    return result
+
+  def clear_all_doc(self,sys_collection_name):
+    fs = gridfs.GridFS(self.db)
+    saved_object_ID = self.get_stored_file_id(sys_collection_name)
+    for f in fs.find():
+      object_id = f._file.get('_id')
+      str_object_id = str(object_id)
+      if str_object_id in saved_object_ID:
+        print "Import object id: ",str_object_id
+      else:
+        print "Delete object id:", str_object_id
+        self.delete_temp(object_id)
+    return True
+
+  def save_json_to_collection(self, json, collection):
+    result = self.db[collection].insert_one(json)
+    pattern_id = str(result.inserted_id)
+
+    return pattern_id
+
 # def main():
 #     obj = mongodbbatch(host="172.18.60.20", port="27017", db="DDDB")
 #     fs = gridfs.GridFS(obj.get_db())
-#     object_ID = ObjectId("57ae345863dc2e0b24e90653")
-#     temp = obj.get_user_usergroup_list("sys_users", "sys_users_group")
+#     saved_object_ID = obj.get_stored_file_id('connection')
+#     for f in fs.find():
+#       object_id = f._file.get('_id')
+#       str_object_id = str(object_id)
+#       if str_object_id in saved_object_ID:
+#         print "Import object id: ",str_object_id
+#       else:
+#         print "Delete object id:", str_object_id
+#         obj.delete_temp(object_id)
 #
-#     print temp
+#
 #
 #
 #

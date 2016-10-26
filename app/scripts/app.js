@@ -206,6 +206,7 @@ angular
                title: 'Dataset Importing',
                icon: 'images/icon/settings.svg'
              }
+
        ];
 
   $scope.doGetHelp = function(){

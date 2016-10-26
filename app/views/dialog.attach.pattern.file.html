@@ -46,7 +46,7 @@
                     <th ng-show="attachmentUploader.isHTML5">Size</th>
                     <th ng-show="attachmentUploader.isHTML5">Progress</th>
                     <th>Status</th>
-                    <th>Description</th>
+                    <th>Description<font color="red">*</font></th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -70,32 +70,25 @@
                       <button type="button" class="btn btn-success btn-xs" ng-click="item.upload()" ng-disabled="item.isReady || item.isUploading || item.isSuccess">
                           <span class="glyphicon glyphicon-upload"></span> Upload
                       </button>
-                      <button type="button" class="btn btn-danger btn-xs" ng-click="item.remove()">
+                      <button type="button" class="btn btn-danger btn-xs" ng-click="doRemoveItem(item)">
                           <span class="glyphicon glyphicon-trash"></span> Remove
                       </button>
                     </td>
                   </tr>
                 </tbody>
               </table>
-              <div >
+              <div>
                 <div>
                   Queue progress:
                   <div class="progress" style="">
                     <div class="progress-bar" role="progressbar" ng-style="{ 'width': attachmentUploader.progress + '%' }"></div>
                   </div>
                 </div>
-                <div layout = "row">
-                  <button type="button" class="btn btn-success btn-s" ng-click="attachmentUploader.uploadAll()" ng-disabled="!attachmentUploader.getNotUploadedItems().length">
-                      Upload all
-                  </button>
-                  <button type="button" class="btn btn-danger btn-s" ng-click="attachmentUploader.clearQueue()" ng-disabled="!attachmentUploader.queue.length">
-                      Remove all
-                  </button>
-
-                  <span flex></span>
-                  <md-button class="md-primary md-raised" ng-click="doSaveAttach()">Save</md-button>
-                  <md-button ng-click="doCancelAttach()">Cancel</md-button>
-                </div>
+                <button type="button" class="btn btn-success btn-s" ng-click="attachmentUploader.uploadAll()" ng-disabled="!attachmentUploader.getNotUploadedItems().length">
+                    Upload all
+                </button>
+                <span flex></span>
+                <md-button ng-click="doClearAttach()">Clear</md-button>
 
               </div>
             </div>

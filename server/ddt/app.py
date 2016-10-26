@@ -17,6 +17,7 @@ MD_COLLECTION_NAME = 'meta_data'
 USER_COLLECTION_NAME = 'sys_users'
 USER_GROUP_COLLECTION_NAME = 'sys_users_group'
 SYS_COLLECTION_NAME = 'sys_conf'
+SYS_PATTERN_NAME = 'sys_patterns'
 
 app = Flask(__name__, static_url_path='')
 app.secret_key = 'ddt key'
@@ -211,8 +212,15 @@ def checkpatternattachedfile():
     else:
         return jsonify({'status': False, 'descr': str(file_descr), 'fileName': file_name, 'objectId': None})
 
+@app.route('/clearAllAttachFile', methods = ['GET', 'POST'])
+def clearallattachfile():
+  logging.info('API: /clearAllAttachFile, method: clearallattachfile()')
+  if request.method == 'POST':
+    objectId = request.data
+    chk = obj.delete_temp(objectId)
+    return jsonify({'status': chk})
 
-
+  return jsonify({'status': False})
 
 
 @app.route('/getSystemUser',methods=['GET','POST'])
@@ -220,6 +228,52 @@ def getsystemuser():
   logging.info('API: /getSystemUser, method: getsystemuser()')
   result = obj.get_user_usergroup_list(USER_COLLECTION_NAME, USER_GROUP_COLLECTION_NAME)
   return jsonify({'status': result})
+
+@app.route('/clearAllDoc',methods=['GET','POST'])
+def clearalldoc():
+  logging.info('API: /clearAllDoc, method: clearalldoc()')
+  result = obj.clear_all_doc(CON_COLLECTION_NAME)
+  return jsonify({'status': result})
+
+@app.route('/saveQueryPattern', methods=['GET','POST'])
+def savequerypattern():
+  logging.info('API: /saveQueryPattern, method: savequerypattern()')
+
+  if request.method == 'POST':
+    timestamp = datetime.now()
+    input_data = json.loads(request.data)
+    attach_list = input_data['attach_list']
+    conn_key = input_data['conn_key']['conn_key']
+    creation_user = input_data['creation_user']
+    pattern_descr = input_data['pattern_descr']
+    pattern_text = input_data['pattern_text']
+    pattern_type = input_data['pattern_type']
+    user_open_list = input_data['user_open_list']
+    condition_subject_area = [] if input_data.get('condition') is None else input_data['user_open_list']
+    selection_subject_area = [] if input_data.get('selection') is None else input_data['user_open_list']
+
+    for attach in attach_list:
+      attach['upload_time'] = timestamp
+
+    pattern_profile = {
+      'pattern_descr': pattern_descr,
+      'pattern_text': pattern_text,
+      'pattern_type': pattern_type,
+      'creation_user': creation_user,
+      'creation_time': timestamp,
+      'modification_time': timestamp,
+      'connection_key': conn_key,
+      'user_open_list': user_open_list,
+      'attach_list': attach_list,
+      'condition_subArea': condition_subject_area,
+      'selection_subArea': selection_subject_area
+    }
+
+    pattern_id = obj.save_json_to_collection(pattern_profile, SYS_PATTERN_NAME)
+
+  else:
+    pattern_id = None
+  return jsonify({'status': pattern_id})
 
 
 if __name__ == "__main__":
