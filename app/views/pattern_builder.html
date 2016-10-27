@@ -134,7 +134,7 @@
                   <md-datepicker ng-model="search.start_date" md-max-date="maxDate" md-placeholder="Enter Start date" ></md-datepicker>
                   <md-datepicker ng-model="search.end_date" md-date-filter="onlyLaterDate" md-max-date="maxDate" md-placeholder="Enter End date"></md-datepicker>
                   <span flex></span>
-                  <md-chips ng-model="selectedConnKey" md-autocomplete-snap="" md-transform-chip="transformChip($chip.conn_key)" md-require-match="true">
+                  <md-chips ng-model="search.conn_keys" md-autocomplete-snap="" md-transform-chip="transformChip($chip.conn_key)" md-require-match="true">
                     <md-autocomplete md-selected-item="selectedItem" md-search-text="searchText" md-items="item in querySearch(searchText)" md-item-text="item.conn_key" placeholder="Search for connection key">
                       <span md-highlight-text="searchText">{{item.conn_key}}</span>
                     </md-autocomplete>
@@ -170,21 +170,33 @@
                     <md-content flex layout-padding style="height: 500px" >
                       <table class="table table-hover">
                         <tr>
-                          <th>Connection ID</th>
+                          <th>ID</th>
+                          <th>Type</th>
+                          <th>Connection</th>
                           <th>Description</th>
-                          <th>Version</th>
-                          <th>Update Date</th>
-                          <th>File Name</th>
-                          <th>Detail</th>
-                          <th>Action</th>
+                          <th>Owner</th>
+                          <th>Updated Date</th>
+                          <th>Content</th>
+                          <th>Conditions</th>
+                          <th>Selections</th>
+                          <th>User List</th>
+                          <th>Attach List</th>
+                          <th>Actions</th>
                         </tr>
-                        <tr ng-repeat="conn in connInfo">
-                          <td>{{conn.conn_key}}</td>
-                          <td>{{conn.desc | limitTo:20}} <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">...<div data-toggle="tooltip" ng-show="showPopover">{{conn.desc}}</div></a></td>
-                          <td>{{conn.version}}</td>
-                          <td>{{conn.updated_date}}</td>
-                          <td>{{conn.file_name}}</td>
-                          <td><a href=""  ng-click="showConnDetail(conn.detail)">Click</a></td>
+                        <tr ng-repeat="pattern in patternInfo">
+                          <td>ID<a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">...<div data-toggle="tooltip" ng-show="showPopover">{{pattern._id}}</div></a></td>
+                          <td>{{pattern.pattern_type}}</td>
+                          <td>{{pattern.connection_key}}</td>
+                          <td>{{pattern.pattern_descr | limitTo:20}} <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">...<div data-toggle="tooltip" ng-show="showPopover">{{conn.desc}}</div></a></td>
+                          <td>{{pattern.created_user}}</td>
+                          <td>{{pattern.updated_date}}</td>
+                          <td><a href=""  ng-click="showPatternText(pattern.pattern_text)">Click</a></td>
+                          <td>{{pattern.condition_subArea.length}}</td>
+                          <td>{{pattern.selection_subArea.length}}</td>
+                          <td>{{pattern.user_open_list.length}}</td>
+                          <td>{{pattern.attach_list.length}}</td>
+
+
                           <td nowrap>
                             <button class="btn" ng-click="editDS(conn.conn_key)">
                             <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Edit

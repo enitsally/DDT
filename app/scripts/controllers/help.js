@@ -2,11 +2,20 @@
 
 
 angular.module('ddtApp')
-  .controller('helpCtrl', function ($scope, $rootScope, $http, $state, $mdToast, AUTH_EVENTS, AuthService, IdleService) {
+  .controller('helpCtrl', function ($scope, $rootScope, $http, $state, $mdToast, $mdDialog,AUTH_EVENTS, AuthService, IdleService) {
 
     $scope.doClearDoc = function(){
       $http.post('http://localhost:5000/clearAllDoc').then(function(response){
-          console.log('delete file task status: '+response.data.status);
+
+          var message = 'Deleted file number: ' + response.data.status.length;
+          console.log('delete file id: '+response.data.status);
+          $mdDialog.show(
+            $mdDialog.alert()
+              .parent(angular.element(document.querySelector('#popupContainer')))
+              .clickOutsideToClose(true)
+              .textContent(message)
+              .ok('Got it!')
+          );
       }, function (){
 
       });

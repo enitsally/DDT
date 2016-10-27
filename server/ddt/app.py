@@ -181,6 +181,38 @@ def getsearchedconnectionsummary():
   result = obj.get_connection_summary(CON_COLLECTION_NAME, '', start_time, end_time, conn_key)
   return jsonify({'status': result})
 
+@app.route('/getPatternSummary', methods=['GET', 'POST'])
+def getpatternsummary():
+  logging.info('API: /getPatternSummary, method: getpatternsummary()')
+  input_data = json.loads(request.data)
+  time_range = input_data['time_range']
+  start_time = input_data['start_date']
+  end_time = input_data['end_date']
+  result = obj.get_pattern_summary(SYS_PATTERN_NAME, time_range, start_time, end_time, [], [])
+  return jsonify({'status': result})
+
+@app.route('/getSearchedPatternSummary', methods=['GET', 'POST'])
+def getsearchedpatternsummary():
+  logging.info('API: /getSearchedPatternSummary, method: getsearchedpatternsummary()')
+  input_data = json.loads(request.data)
+  start_time = input_data['start_date'] if input_data['start_date'] == '' else datetime.strptime(
+    input_data['start_date'][:10], "%Y-%m-%d")
+  end_time = input_data['end_date'] if input_data['end_date'] == '' else datetime.strptime(input_data['end_date'][:10],
+                                                                                           "%Y-%m-%d") + timedelta(
+    days=1)
+  key_info = input_data['conn_keys']
+
+  conn_key= []
+  for key in key_info:
+    conn_key.append(key.get('conn_key'))
+
+  pattern_type = input_data['pattern_selected']
+
+  result = obj.get_pattern_summary(SYS_PATTERN_NAME, '', start_time, end_time, conn_key, pattern_type)
+  return jsonify({'status': result})
+
+
+
 @app.route('/getPatternType', methods=['GET', 'POST'])
 def getpatterntype():
   logging.info('API: /getPatternType, method: getpatterntype()')
@@ -232,7 +264,7 @@ def getsystemuser():
 @app.route('/clearAllDoc',methods=['GET','POST'])
 def clearalldoc():
   logging.info('API: /clearAllDoc, method: clearalldoc()')
-  result = obj.clear_all_doc(CON_COLLECTION_NAME)
+  result = obj.clear_all_doc()
   return jsonify({'status': result})
 
 @app.route('/saveQueryPattern', methods=['GET','POST'])
@@ -259,9 +291,9 @@ def savequerypattern():
       'pattern_descr': pattern_descr,
       'pattern_text': pattern_text,
       'pattern_type': pattern_type,
-      'creation_user': creation_user,
-      'creation_time': timestamp,
-      'modification_time': timestamp,
+      'created_user': creation_user,
+      'created_date': timestamp,
+      'updated_date': timestamp,
       'connection_key': conn_key,
       'user_open_list': user_open_list,
       'attach_list': attach_list,

@@ -6,7 +6,7 @@ angular.module('ddtApp')
 
     $scope.customFullscreen = false;
     $scope.search = {
-      exp_user : $scope.currentUser ? $scope.currentUser.id : '',
+      creation_user : $scope.currentUser ? $scope.currentUser.id : '',
       start_date:'',
       end_date:'',
       conn_keys:[],
@@ -267,6 +267,15 @@ angular.module('ddtApp')
       });
     };
 
+    $scope.doSearchPattern = function(){
+      $http.post('http://localhost:5000/getSearchedPatternSummary', $scope.search).then(function(response){
+          $scope.patternInfo = response.data.status;
+          console.log($scope.patternInfo);
+      }, function (){
+
+      });
+    };
+
     $scope.setIndex = function (index){
       $scope.selectedIndex = index;
       $scope.onShowPeriodChanged();
@@ -323,6 +332,23 @@ angular.module('ddtApp')
 
       });
     }
+
+    $scope.showPatternText = function (info){
+      var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+      $mdDialog.show({
+            controller: DialogController,
+            templateUrl: 'views/dialog.conn.info.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose:true,
+            fullscreen: useFullScreen,
+            locals:{
+              result: info
+            },
+            scope: $scope,
+            preserveScope: true
+          });
+
+    };
 
     $scope.querySearch  = function(query) {
       var results = query ? $scope.conn_keys_respo.filter( createFilterFor(query) ) : $scope.conn_keys_respo,

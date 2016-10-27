@@ -7,7 +7,6 @@ from datetime import datetime
 from datetime import timedelta
 import pymongo
 import gridfs
-import StringIO
 from DBFactory import Connector
 from DBMetaData import DBMetaData
 
@@ -17,6 +16,13 @@ logging.basicConfig()
 logging.getLogger("datadiscovery.demo").setLevel(logging.DEBUG)
 
 support_dialect = ['netezza', 'sqlsever', 'redshift', 'mysql']
+
+CON_COLLECTION_NAME = 'connection'
+MD_COLLECTION_NAME = 'meta_data'
+USER_COLLECTION_NAME = 'sys_users'
+USER_GROUP_COLLECTION_NAME = 'sys_users_group'
+SYS_COLLECTION_NAME = 'sys_conf'
+SYS_PATTERN_NAME = 'sys_patterns'
 
 
 class mongodbbatch:
@@ -275,6 +281,67 @@ class mongodbbatch:
       result.append(tmp)
     return result
 
+  def get_pattern_summary(self, pattern_collection_name, time_range, start_time, end_time, conn_keys, pattern_types):
+    result = []
+    if start_time == '' and end_time == '':
+      lt_time = datetime.now()
+      if time_range == '1':
+        gt_time = datetime.now() + timedelta(days=-365)
+      elif time_range == '6':
+        gt_time = datetime.now() + timedelta(days=-183)
+      elif time_range == '3':
+        gt_time = datetime.now() + timedelta(days=-93)
+      else:
+        gt_time = '*'
+    else:
+      gt_time = start_time
+      lt_time = end_time
+    logging.info('start_time:'.format(start_time))
+    logging.info('end_time:'.format(end_time))
+    if gt_time == '*' and len(conn_keys) == 0 and len(pattern_types) == 0:
+      pattern_list = list(self.db[pattern_collection_name].find({}).sort("updated_date", -1))
+    elif gt_time == '*' and len(conn_keys) == 0 and len(pattern_types) > 0:
+      pattern_list = list(self.db[pattern_collection_name].find({'pattern_type': {'$in': pattern_types}}).sort("updated_date", -1))
+    elif gt_time == '*' and len(conn_keys) > 0 and len(pattern_types) == 0:
+      pattern_list = list(self.db[pattern_collection_name].find({'connection_key': {'$in': conn_keys}}).sort("updated_date", -1))
+    elif gt_time == '*' and len(conn_keys) > 0 and len(pattern_types) > 0:
+      pattern_list = list(self.db[pattern_collection_name].find({'connection_key': {'$in': conn_keys}, 'pattern_type': {'$in': pattern_types}}).sort("updated_date", -1))
+    elif len(conn_keys) == 0 and len(pattern_types) == 0:
+      pattern_list = list(
+        self.db[pattern_collection_name].find({'updated_date': {'$lt': lt_time, '$gt': gt_time}}).sort(
+          "updated_date", -1))
+    elif len(conn_keys) > 0 and len(pattern_types) == 0:
+      pattern_list = list(
+        self.db[pattern_collection_name].find({'updated_date': {'$lt': lt_time, '$gt': gt_time}, 'connection_key': {'$in': conn_keys}}).sort(
+          "updated_date", -1))
+    elif len(conn_keys) == 0 and len(pattern_types) > 0:
+      pattern_list = list(
+        self.db[pattern_collection_name].find({'updated_date': {'$lt': lt_time, '$gt': gt_time}, 'pattern_type': {'$in': pattern_types}}).sort(
+          "updated_date", -1))
+    elif len(conn_keys) > 0 and len(pattern_types) > 0:
+      pattern_list = list(
+        self.db[pattern_collection_name].find({'updated_date': {'$lt': lt_time, '$gt': gt_time}, 'pattern_type': {'$in': pattern_types}, 'connection_key': {'$in': conn_keys}}).sort(
+          "updated_date", -1))
+
+
+    # for pattern in pattern_list:
+    #   tmp = {}
+    #   for k in pattern:
+    #     if type(pattern.get(k)) is dict:
+    #       tmp['conn_key'] = k
+    #       tmp['desc'] = pattern.get(k).get('desc')
+    #       tmp['version'] = pattern.get(k).get('version')
+    #       tmp['detail'] = pattern.get(k)
+    #     else:
+    #       tmp[k] = str(pattern.get(k))
+    #   result.append(tmp)
+    # return result
+    for pattern in pattern_list:
+      pattern['_id'] = str(pattern.get('_id'))
+
+    return pattern_list
+
+
   def del_connection_key(self, connection_collection_name, conn_key):
 
     status = False
@@ -352,7 +419,7 @@ class mongodbbatch:
 
     return result
 
-  def get_stored_file_id(self, sys_collection_name):
+  def get_stored_connection_file_id(self, sys_collection_name):
     result = []
     connection_file_id = list(self.db[sys_collection_name].find({}, {'_id': 0, 'file_id': 1}))
     for file in connection_file_id:
@@ -360,38 +427,45 @@ class mongodbbatch:
 
     return result
 
-  def clear_all_doc(self,sys_collection_name):
+  def get_stored_attach_file_id(self, sys_collection_name):
+    result = []
+    attach_file_id = list(self.db[sys_collection_name].find({'attach_list': {'$exists': True}}, {'_id': 0, 'attach_list.file_id': 1}))
+
+    for file in attach_file_id:
+      attach_list = file.get('attach_list')
+      for t in attach_list:
+        result.append(t.get('file_id'))
+    return result
+
+  def clear_all_doc(self):
+    deleted_file_id = []
     fs = gridfs.GridFS(self.db)
-    saved_object_ID = self.get_stored_file_id(sys_collection_name)
+    # get saved file id from connection collection
+    saved_connection_id = self.get_stored_connection_file_id(CON_COLLECTION_NAME)
+    saved_attachment_id = self.get_stored_attach_file_id(SYS_PATTERN_NAME)
+
+    saved_object_ID = saved_connection_id + saved_attachment_id
+
     for f in fs.find():
       object_id = f._file.get('_id')
       str_object_id = str(object_id)
-      if str_object_id in saved_object_ID:
-        print "Import object id: ",str_object_id
-      else:
-        print "Delete object id:", str_object_id
+      if str_object_id not in saved_object_ID:
         self.delete_temp(object_id)
-    return True
+        deleted_file_id.append(str_object_id)
+
+    return deleted_file_id
 
   def save_json_to_collection(self, json, collection):
     result = self.db[collection].insert_one(json)
     pattern_id = str(result.inserted_id)
+
 
     return pattern_id
 
 # def main():
 #     obj = mongodbbatch(host="172.18.60.20", port="27017", db="DDDB")
 #     fs = gridfs.GridFS(obj.get_db())
-#     saved_object_ID = obj.get_stored_file_id('connection')
-#     for f in fs.find():
-#       object_id = f._file.get('_id')
-#       str_object_id = str(object_id)
-#       if str_object_id in saved_object_ID:
-#         print "Import object id: ",str_object_id
-#       else:
-#         print "Delete object id:", str_object_id
-#         obj.delete_temp(object_id)
-#
+#     obj.get_stored_attach_file_id(SYS_PATTERN_NAME)
 #
 #
 #
