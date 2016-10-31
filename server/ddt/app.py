@@ -307,6 +307,15 @@ def savequerypattern():
     pattern_id = None
   return jsonify({'status': pattern_id})
 
+@app.route('/deleteAttachFile', methods=['GET','POST'])
+def deleteattachfile():
+  logging.info('API: /deleteAttachFile, method: deleteattachfile()')
+  if request.method == 'POST':
+    input_data = json.loads(request.data)
+    pattern_id = input_data['id']
+    operate_user = input_data['user']
+    result = obj.del_pattern(pattern_id, operate_user)
+    return jsonify({'status': result})
 
 if __name__ == "__main__":
   # logging.config.fileConfig('logging.conf')

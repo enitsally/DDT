@@ -2,7 +2,7 @@
 
 
 angular.module('ddtApp')
-  .controller('patternBuilderCtrl', function ($log, $filter, $timeout, $q, $scope, $rootScope, $http, $state, $mdToast,$mdMedia,$mdDialog, FileUploader, AUTH_EVENTS, AuthService, IdleService) {
+  .controller('patternBuilderCtrl', function ($log, $filter, $timeout, $q, $scope, $rootScope, $http, $state,$mdMedia,$mdDialog, FileUploader, AUTH_EVENTS, AuthService, IdleService) {
 
     $scope.customFullscreen = false;
     $scope.search = {
@@ -55,6 +55,14 @@ angular.module('ddtApp')
       $scope.searchUser = '';
 
       $scope.patternUploader.clearQueue();
+
+      $scope.search.start_date = '';
+      $scope.search.end_date = '';
+      $scope.search.conn_keys = [];
+      $scope.search.pattern_selected = [];
+
+      $scope.ShownPeriod = "3";
+      $scope.onShowPeriodChanged();
     };
 
     $scope.doClearText = function(){
@@ -109,13 +117,52 @@ angular.module('ddtApp')
             fullscreen: useFullScreen,
             locals:{
               result: $scope.newcreation
-              // user: $scope.user_respo,
-              // searchuser: $scope.searchUser,
-              // selecteduser: $scope.selectedUser
+
             },
             scope: $scope,
             preserveScope: true
           });
+
+    };
+
+    $scope.deletePattern = function(id){
+
+      var confirm = $mdDialog.confirm()
+          .title('Would you like to delete this pattern?')
+          // .textContent('All of the banks have agreed to forgive you your debts.')
+          .ariaLabel('Confirmation Page')
+          // .targetEvent(ev)
+          .ok('Yes')
+          .cancel('Cancel');
+      var user = $scope.currentUser ? $scope.currentUser.id : '';
+      var criteria = {
+        'id': id,
+        'user' : user
+      }
+
+      $mdDialog.show(confirm).then(function() {
+        $http.post('http://localhost:5000/deleteAttachFile', criteria).then(function(response){
+            $mdDialog.show(
+              $mdDialog.alert()
+                .parent(angular.element(document.querySelector('#popupContainer')))
+                .clickOutsideToClose(true)
+                .title('Alter Message')
+                .textContent(response.data.status.mgs)
+                .ariaLabel('Alert Dialog')
+                .ok('Got it!')
+                // .targetEvent(ev)
+            );
+        }, function (){
+
+        });
+
+        $scope.ShownPeriod = "3";
+        $scope.onShowPeriodChanged();
+
+      }, function() {
+
+      });
+
 
     };
 
@@ -132,6 +179,21 @@ angular.module('ddtApp')
         $mdDialog.hide(answer);
       };
   };
+
+  function DialogController_Pattern($scope, $mdDialog, result, id) {
+    $scope.show_result = result;
+    $scope.show_id = id;
+    $scope.hide = function() {
+      $mdDialog.hide();
+    };
+    $scope.cancel = function() {
+      $mdDialog.cancel();
+    };
+    $scope.answer = function(answer) {
+      $mdDialog.hide(answer);
+    };
+};
+
 
     $scope.onlyLaterDate = function (date) {
       var day = date;
@@ -181,23 +243,6 @@ angular.module('ddtApp')
       queueLimit: 20
     });
 
-    // $scope.patternUploader.filters.push({
-    //   name:'txtFilter',
-    //   fn: function(item, options){
-    //     var name = item.name.split(".")[0]
-    //     var type = item.name.split(".")[1];
-    //     return 'txt'=== type;
-    //   }
-    // });
-    //
-    // $scope.uploader.filters.push({
-    //   name:'txtFilter',
-    //   fn: function(item, options){
-    //     var name = item.name.split(".")[0]
-    //     var type = item.name.split(".")[1];
-    //     return 'txt'=== type;
-    //   }
-    // });
 
     $scope.patternUploader.onSuccessItem  = function(item, response){
       $scope.newcreation.pattern_text = response.status ;
@@ -333,16 +378,89 @@ angular.module('ddtApp')
       });
     }
 
-    $scope.showPatternText = function (info){
+    $scope.showPatternText = function (context, id){
       var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
       $mdDialog.show({
-            controller: DialogController,
-            templateUrl: 'views/dialog.conn.info.html',
+            controller: DialogController_Pattern,
+            templateUrl: 'views/dialog.pattern.context.html',
             parent: angular.element(document.body),
             clickOutsideToClose:true,
             fullscreen: useFullScreen,
             locals:{
-              result: info
+              result: context,
+              id : id
+            },
+            scope: $scope,
+            preserveScope: true
+          });
+
+    };
+
+    $scope.showPatternUser = function (users, id){
+      var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+      $mdDialog.show({
+            controller: DialogController_Pattern,
+            templateUrl: 'views/dialog.pattern.user.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose:true,
+            fullscreen: useFullScreen,
+            locals:{
+              result: users,
+              id : id
+            },
+            scope: $scope,
+            preserveScope: true
+          });
+
+    };
+
+    $scope.showPatternAttach = function (attach, id){
+      var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+      $mdDialog.show({
+            controller: DialogController_Pattern,
+            templateUrl: 'views/dialog.pattern.attach.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose:true,
+            fullscreen: useFullScreen,
+            locals:{
+              result: attach,
+              id : id
+            },
+            scope: $scope,
+            preserveScope: true
+          });
+
+    };
+
+    $scope.showPatternCondition = function (condition, id){
+      var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+      $mdDialog.show({
+            controller: DialogController_Pattern,
+            templateUrl: 'views/dialog.pattern.condition.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose:true,
+            fullscreen: useFullScreen,
+            locals:{
+              result: condition,
+              id : id
+            },
+            scope: $scope,
+            preserveScope: true
+          });
+
+    };
+
+    $scope.showPatternSelection = function (selection, id){
+      var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+      $mdDialog.show({
+            controller: DialogController_Pattern,
+            templateUrl: 'views/dialog.pattern.selection.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose:true,
+            fullscreen: useFullScreen,
+            locals:{
+              result: selection,
+              id : id
             },
             scope: $scope,
             preserveScope: true

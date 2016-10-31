@@ -1,0 +1,32 @@
+<md-dialog aria-label="Pattern Context">
+
+
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Pattern (ID = {{show_id}} ) Selections Detail</h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon md-svg-src="images/icon/close.svg" aria-label="Close dialog"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+      <div class="md-dialog-content">
+          <table class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th>User Name</th>
+                          <th>User Type</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr ng-repeat="item in show_result">
+                          <td>{{item.name}}</td>
+                          <td>{{item.type}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+      </div>
+    </md-dialog-content>
+</md-dialog>

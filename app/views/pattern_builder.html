@@ -187,24 +187,23 @@
                           <td>ID<a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">...<div data-toggle="tooltip" ng-show="showPopover">{{pattern._id}}</div></a></td>
                           <td>{{pattern.pattern_type}}</td>
                           <td>{{pattern.connection_key}}</td>
-                          <td>{{pattern.pattern_descr | limitTo:20}} <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">...<div data-toggle="tooltip" ng-show="showPopover">{{conn.desc}}</div></a></td>
+                          <td>{{pattern.pattern_descr | limitTo:20}} <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;" >...<div data-toggle="tooltip" ng-show="showPopover">{{pattern.pattern_descr}}</div></a></td>
                           <td>{{pattern.created_user}}</td>
                           <td>{{pattern.updated_date}}</td>
-                          <td><a href=""  ng-click="showPatternText(pattern.pattern_text)">Click</a></td>
-                          <td>{{pattern.condition_subArea.length}}</td>
-                          <td>{{pattern.selection_subArea.length}}</td>
-                          <td>{{pattern.user_open_list.length}}</td>
-                          <td>{{pattern.attach_list.length}}</td>
-
+                          <td><a href=""  ng-click="showPatternText(pattern.pattern_text, pattern._id)">Click</a></td>
+                          <td><a href=""  ng-click="showPatternCondition(pattern.condition_subArea, pattern._id)">{{pattern.condition_subArea.length}}</a></td>
+                          <td><a href=""  ng-click="showPatternSelection(pattern.selection_subArea, pattern._id)">{{pattern.selection_subArea.length}}</a></td>
+                          <td><a href=""  ng-click="showPatternUser(pattern.user_open_list, pattern._id)">{{pattern.user_open_list.length}}</a></td>
+                          <td><a href=""  ng-click="showPatternAttach(pattern.attach_list, pattern._id)">{{pattern.attach_list.length}}</a></td>
 
                           <td nowrap>
-                            <button class="btn" ng-click="editDS(conn.conn_key)">
+                            <button class="btn" ng-click="editPattern(pattern._id)">
                             <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Edit
                             </button>
-                            <button class="btn" ng-click="deleteDS(conn.conn_key)">
+                            <button class="btn" ng-click="deletePattern(pattern._id)">
                             <span class="glyphicon glyphicon-remove"></span>&nbsp;&nbsp;Delete
                             </button>
-                            <button class="btn" ng-click="testDS(conn.conn_key)">
+                            <button class="btn" ng-click="testPattern(pattern._id)">
                             <span class="glyphicon glyphicon-play-circle"></span>&nbsp;&nbsp;Test
                             </button>
                           </td>

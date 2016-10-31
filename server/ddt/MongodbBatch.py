@@ -462,6 +462,26 @@ class mongodbbatch:
 
     return pattern_id
 
+  def del_pattern(self, pattern_id, operate_user):
+    chk = self.db[SYS_PATTERN_NAME].find_one({'_id': ObjectId(pattern_id)})
+    if chk is not None:
+      if chk.get('created_user') == operate_user:
+        status = True
+        mgs = "Pattern deleted."
+        attach_list = chk.get('attach_list')
+        for attach in attach_list:
+          self.delete_temp(attach.get('file_id'))
+          self.db[SYS_PATTERN_NAME].delete_one({'_id': ObjectId(pattern_id)})
+      else:
+        status = False
+        mgs = "You are not the owner of this pattern, permission denied."
+    else:
+      status = False
+      mgs = "Pattern doesn't exist."
+
+    return {'status': status, 'mgs': mgs}
+
+
 # def main():
 #     obj = mongodbbatch(host="172.18.60.20", port="27017", db="DDDB")
 #     fs = gridfs.GridFS(obj.get_db())

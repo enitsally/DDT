@@ -1,0 +1,38 @@
+<md-dialog aria-label="Pattern Context">
+
+
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Pattern (ID = {{show_id}} ) Attachments Detail</h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon md-svg-src="images/icon/close.svg" aria-label="Close dialog"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+      <div class="md-dialog-content">
+          <table class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th>File Name</th>
+                          <th>Description</th>
+                          <th>Upload Time</th>
+                          <th>File ID</th>
+                          <th>File Size</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr ng-repeat="item in show_result">
+                          <td>{{item.file_name}}</td>
+                          <td>{{item.description | limitTo:20}} <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">...<div data-toggle="tooltip" ng-show="showPopover">{{item.description}}</div></a></td>
+                          <td>{{item.upload_time}}</td>
+                          <td>{{item.file_id}}</td>
+                          <td>{{item.file_size}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+      </div>
+    </md-dialog-content>
+</md-dialog>
