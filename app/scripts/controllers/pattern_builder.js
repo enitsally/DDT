@@ -13,6 +13,22 @@ angular.module('ddtApp')
       pattern_selected: []
     };
 
+    $scope.edit_condition = true;
+    $scope.hideform_condition = true;
+    $scope.currentRow_condition = {
+      name:'',
+      descr:'',
+      row_id: ''
+    };
+
+    $scope.edit_selection = true;
+    $scope.hideform_selection = true;
+    $scope.currentRow_selection = {
+      col_name:'',
+      nick_name:'',
+      row_id: ''
+    };
+
     $scope.newcreation = {
       creation_user : $scope.currentUser ? $scope.currentUser.id : '',
       pattern_text : '',
@@ -21,7 +37,9 @@ angular.module('ddtApp')
       pattern_descr: '',
       user_open_list : [],
       extended_func_list : [],
-      attach_list: []
+      attach_list: [],
+      condition_list: [],
+      selection_list: []
     };
 
     $scope.ShownPeriod = "3";
@@ -106,6 +124,7 @@ angular.module('ddtApp')
           });
     };
 
+
     $scope.doAttachUserGroup = function(){
 
       var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
@@ -125,6 +144,42 @@ angular.module('ddtApp')
 
     };
 
+    $scope.doAttachCondition = function(){
+
+      var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+      $mdDialog.show({
+            controller: DialogController,
+            templateUrl: 'views/dialog.assign.pattern.condition.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose:false,
+            fullscreen: useFullScreen,
+            locals:{
+              result: $scope.newcreation
+
+            },
+            scope: $scope,
+            preserveScope: true
+          });
+    };
+
+    $scope.doAttachSelection = function(){
+
+      var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+      $mdDialog.show({
+            controller: DialogController,
+            templateUrl: 'views/dialog.assign.pattern.selection.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose:false,
+            fullscreen: useFullScreen,
+            locals:{
+              result: $scope.newcreation
+
+            },
+            scope: $scope,
+            preserveScope: true
+          });
+    };
+
     $scope.deletePattern = function(id){
 
       var confirm = $mdDialog.confirm()
@@ -141,7 +196,7 @@ angular.module('ddtApp')
       }
 
       $mdDialog.show(confirm).then(function() {
-        $http.post('http://localhost:5000/deleteAttachFile', criteria).then(function(response){
+        $http.post('http://localhost:5000/deletePattern', criteria).then(function(response){
             $mdDialog.show(
               $mdDialog.alert()
                 .parent(angular.element(document.querySelector('#popupContainer')))
@@ -162,9 +217,131 @@ angular.module('ddtApp')
       }, function() {
 
       });
-
-
     };
+
+    $scope.testPattern = function(id){
+      $http.post('http://localhost:5000/testSQLPattern', id).then(function(response){
+          $mdDialog.show(
+            $mdDialog.alert()
+              .parent(angular.element(document.querySelector('#popupContainer')))
+              .clickOutsideToClose(true)
+              .title('Alter Message')
+              .textContent(response.data.status.mgs)
+              .ariaLabel('Alert Dialog')
+              .ok('Got it!')
+              // .targetEvent(ev)
+          );
+      }, function (){
+
+      });
+    }
+
+    $scope.doTestPatternDraft = function(){
+      $http.post('http://localhost:5000/testSQLPatternDraft', $scope.newcreation).then(function(response){
+          $mdDialog.show(
+            $mdDialog.alert()
+              .parent(angular.element(document.querySelector('#popupContainer')))
+              .clickOutsideToClose(true)
+              .title('Alter Message')
+              .textContent(response.data.status.mgs)
+              .ariaLabel('Alert Dialog')
+              .ok('Got it!')
+              // .targetEvent(ev)
+          );
+      }, function (){
+
+      });
+    }
+
+
+    $scope.editRow_condtion = function(flag, name, descr) {
+          $scope.hideform_condition = false;
+          if (flag === 'N') {
+            $scope.edit_condition = true;
+            }
+          else {
+            $scope.edit_condition = false;
+            $scope.currentRow_condition.name =  name;
+            $scope.currentRow_condition.descr = descr;
+            $scope.currentRow_condition.row_id = flag;
+          }
+        };
+
+    $scope.saveEdit_condition = function (index){
+          if (index > -1) {
+            var tmp = {
+              'name':$scope.currentRow_condition.name,
+              'descr':$scope.currentRow_condition.descr
+            };
+            $scope.newcreation.condition_list.splice(index, 1);
+            $scope.newcreation.condition_list.splice(index, 0 , tmp);
+          }
+          $scope.currentRow_condition.row_id = '';
+          $scope.currentRow_condition.name= '';
+          $scope.currentRow_condition.descr = '';
+        };
+
+    $scope.saveNew_condition = function () {
+          var tmp = {
+            'name':$scope.currentRow_condition.name,
+            'descr':$scope.currentRow_condition.descr
+          };
+          $scope.newcreation.condition_list.push(tmp);
+          $scope.currentRow_condition.row_id = '';
+          $scope.currentRow_condition.name = '';
+          $scope.currentRow_condition.descr = '';
+        };
+
+    $scope.deleteRow_condition = function (index){
+        if (index > -1) {
+            $scope.newcreation.condition_list.splice(index, 1);
+        }
+      };
+
+
+      $scope.editRow_selection = function(flag, col_name, nick_name) {
+            $scope.hideform_selection = false;
+            if (flag === 'N') {
+              $scope.edit_selection = true;
+              }
+            else {
+              $scope.edit_selection = false;
+              $scope.currentRow_selection.col_name =  col_name;
+              $scope.currentRow_selection.nick_name = nick_name;
+              $scope.currentRow_selection.row_id = flag;
+            }
+          };
+
+      $scope.saveEdit_selection = function (index){
+            if (index > -1) {
+              var tmp = {
+                'col_name':$scope.currentRow_selection.col_name,
+                'nick_name':$scope.currentRow_selection.nick_name
+              };
+              $scope.newcreation.selection_list.splice(index, 1);
+              $scope.newcreation.selection_list.splice(index, 0 , tmp);
+            }
+            $scope.currentRow_selection.row_id = '';
+            $scope.currentRow_selection.col_name = '';
+            $scope.currentRow_selection.nick_name = '';
+          };
+
+      $scope.saveNew_selection = function () {
+            var tmp = {
+              'col_name':$scope.currentRow_selection.col_name,
+              'nick_name':$scope.currentRow_selection.nick_name
+            };
+            $scope.newcreation.selection_list.push(tmp);
+            $scope.currentRow_selection.row_id = '';
+            $scope.currentRow_selection.col_name = '';
+            $scope.currentRow_selection.nick_name = '';
+          };
+
+      $scope.deleteRow_selection = function (index){
+          if (index > -1) {
+              $scope.newcreation.selection_list.splice(index, 1);
+          }
+        };
 
 
     function DialogController($scope, $mdDialog, result) {

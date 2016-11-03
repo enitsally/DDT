@@ -9,6 +9,7 @@ import pymongo
 import gridfs
 from DBFactory import Connector
 from DBMetaData import DBMetaData
+import sqlalchemy
 
 import logging
 
@@ -323,19 +324,6 @@ class mongodbbatch:
         self.db[pattern_collection_name].find({'updated_date': {'$lt': lt_time, '$gt': gt_time}, 'pattern_type': {'$in': pattern_types}, 'connection_key': {'$in': conn_keys}}).sort(
           "updated_date", -1))
 
-
-    # for pattern in pattern_list:
-    #   tmp = {}
-    #   for k in pattern:
-    #     if type(pattern.get(k)) is dict:
-    #       tmp['conn_key'] = k
-    #       tmp['desc'] = pattern.get(k).get('desc')
-    #       tmp['version'] = pattern.get(k).get('version')
-    #       tmp['detail'] = pattern.get(k)
-    #     else:
-    #       tmp[k] = str(pattern.get(k))
-    #   result.append(tmp)
-    # return result
     for pattern in pattern_list:
       pattern['_id'] = str(pattern.get('_id'))
 
@@ -471,7 +459,7 @@ class mongodbbatch:
         attach_list = chk.get('attach_list')
         for attach in attach_list:
           self.delete_temp(attach.get('file_id'))
-          self.db[SYS_PATTERN_NAME].delete_one({'_id': ObjectId(pattern_id)})
+        self.db[SYS_PATTERN_NAME].delete_one({'_id': ObjectId(pattern_id)})
       else:
         status = False
         mgs = "You are not the owner of this pattern, permission denied."
@@ -481,6 +469,152 @@ class mongodbbatch:
 
     return {'status': status, 'mgs': mgs}
 
+  def test_sql_pattern(self, pattern_id):
+    chk = self.db[SYS_PATTERN_NAME].find_one({'_id': ObjectId(pattern_id)})
+    status = False
+    mgs = 'Query test passed.'
+    text = ''
+
+    if chk is not None:
+      if chk.get('pattern_type') is None or chk.get('pattern_type') != 'SQL':
+        mgs = "Your pattern is not the SQL pattern, system couldn't test it."
+      elif chk.get('pattern_text') is None or chk.get('pattern_text') == '':
+        mgs = "Your pattern text is empty, system couldn't test it."
+      elif chk.get('connection_key') is None or chk.get('connection_key') == '':
+        mgs = "Your pattern is not set up for one validated data source connection, system couldn't test it. "
+      else:
+        text = chk.get('pattern_text')
+        conn_key = chk.get('connection_key')
+        if chk.get('condition_subArea') is not None and len(chk.get('condition_subArea')) > 0:
+          condition = chk.get('condition_subArea')
+          text = self.create_condition(text, condition, [])
+        if chk.get('selection_subArea') is not None and len(chk.get('selection_subArea')) > 0:
+          selection = chk.get('selection_subArea')
+          text = self.create_selection(text, selection, [])
+
+      if len(text) > 0:
+        if text[len(text) - 1:] == ';':
+          text = text[:len(text) - 1]
+
+        sql = text + ' limit 1;'
+
+        conn_info = self.get_connection_key(CON_COLLECTION_NAME, conn_key)
+        db = Connector(conn_info)
+        conn = db.get_connection()
+        try:
+          conn.execute(sql)
+        except sqlalchemy.exc.StatementError, exc:
+          status = False
+          mgs = exc.message
+        finally:
+          conn.close()
+    else:
+      mgs = "Pattern doesn't exist."
+    return {'status': status, 'mgs': mgs}
+
+  def test_sql_pattern_draft(self, input_data):
+
+    status = False
+    mgs = 'Query test passed.'
+    text = ''
+
+    if input_data is not None:
+      if input_data.get('pattern_type') is None or input_data.get('pattern_type') != 'SQL':
+        mgs = "Your pattern is not the SQL pattern, system couldn't test it."
+      elif input_data.get('pattern_text') is None or input_data.get('pattern_text') == '':
+        mgs = "Your pattern text is empty, system couldn't test it."
+      elif input_data.get('conn_key') is None or input_data.get('conn_key') == '':
+        mgs = "Your pattern is not set up for one validated data source connection, system couldn't test it. "
+      else:
+        text = input_data.get('pattern_text')
+        conn_key = input_data.get('conn_key').get('conn_key')
+        if input_data.get('condition_list') is not None and len(input_data.get('condition_list')) > 0:
+          condition = input_data.get('condition_list')
+          text = self.create_condition(text, condition, [])
+        if input_data.get('selection_list') is not None and len(input_data.get('selection_list')) > 0:
+          selection = input_data.get('selection_list')
+          text = self.create_selection(text, selection, [])
+
+      if len(text) > 0:
+        if text[len(text) - 1:] == ';':
+          text = text[:len(text) - 1]
+        sql = text + ' limit 1;'
+
+        conn_info = self.get_connection_key(CON_COLLECTION_NAME, conn_key)
+
+        db = Connector(conn_info)
+        conn = db.get_connection()
+        if type(conn) == str:
+          mgs = conn
+        else:
+          try:
+            conn.execute(sql)
+          except sqlalchemy.exc.StatementError, exc:
+            status = False
+            mgs = exc.message
+          finally:
+            conn.close()
+    else:
+      mgs = "Pattern doesn't exist."
+    return {'status': status, 'mgs': mgs}
+
+  def create_condition(self, text, condition, inputs):
+    if len(inputs) > 0:
+      for input in inputs:
+        name = input.get('name')
+        value = input.get('value')
+        # do replace condition with the input values
+    else:
+      for cond in condition:
+        name = cond.get('name')
+        condition_name = name[1:]
+        cond_type = condition_name.split('_')[0]
+        if cond_type == 'str':
+          text = text.replace(name, "''")
+        elif cond_type == 'int':
+          text = text.replace(name, "1")
+        elif cond_type == 'list':
+          text = text.replace(name, "'',''")
+        elif cond_type == 'boolean':
+          text = text.replace(name, "0")
+
+    if text[len(text)-1:] == ';':
+      text = text[:len(text)-1]
+
+    return text
+
+  def create_selection(self, text, selection, inputs):
+    selected_column = []
+    if len(inputs) > 0:
+      text_first_part = self.find_between(text.lower(), 'select', 'from')
+      test_rest_part = self.find_rest('from')
+      col_list = [a.lower() for a in text_first_part.split(',')]
+
+      for input in inputs:
+        name = input.get('col_name')
+        value = input.get('nick_name')
+        if name.lower() in col_list:
+          selected_column.append('{} AS {}'.format(name, value))
+
+      str_col = ','.join(selected_column)
+      text = 'select  {} from {} '.format(str_col,test_rest_part)
+
+    return text
+
+  def find_between(s, first, last):
+    try:
+      start = s.index(first) + len(first)
+      end = s.index(last, start)
+      return s[start:end]
+    except ValueError:
+      return ""
+
+  def find_rest(s, first):
+    try:
+      start = s.index(first) + len(first)
+      return s[start:]
+    except ValueError:
+      return ""
 
 # def main():
 #     obj = mongodbbatch(host="172.18.60.20", port="27017", db="DDDB")

@@ -274,15 +274,15 @@ def savequerypattern():
   if request.method == 'POST':
     timestamp = datetime.now()
     input_data = json.loads(request.data)
-    attach_list = input_data['attach_list']
-    conn_key = input_data['conn_key']['conn_key']
+    attach_list = [] if input_data.get('attach_list') is None else input_data['attach_list']
+    conn_key = '' if input_data.get('conn_key') == '' else input_data['conn_key']['conn_key']
     creation_user = input_data['creation_user']
-    pattern_descr = input_data['pattern_descr']
-    pattern_text = input_data['pattern_text']
-    pattern_type = input_data['pattern_type']
-    user_open_list = input_data['user_open_list']
-    condition_subject_area = [] if input_data.get('condition') is None else input_data['user_open_list']
-    selection_subject_area = [] if input_data.get('selection') is None else input_data['user_open_list']
+    pattern_descr = '' if input_data.get('pattern_descr') is None else input_data['pattern_descr']
+    pattern_text = '' if input_data.get('pattern_text') is None else input_data['pattern_text']
+    pattern_type = '' if input_data.get('pattern_type') is None else input_data['pattern_type']
+    user_open_list = [] if input_data.get('user_open_list') is None else input_data['user_open_list']
+    condition_subject_area = [] if input_data.get('condition_list') is None else input_data['condition_list']
+    selection_subject_area = [] if input_data.get('selection_list') is None else input_data['selection_list']
 
     for attach in attach_list:
       attach['upload_time'] = timestamp
@@ -307,14 +307,30 @@ def savequerypattern():
     pattern_id = None
   return jsonify({'status': pattern_id})
 
-@app.route('/deleteAttachFile', methods=['GET','POST'])
-def deleteattachfile():
-  logging.info('API: /deleteAttachFile, method: deleteattachfile()')
+@app.route('/deletePattern', methods=['GET','POST'])
+def deleteapattern():
+  logging.info('API: /deletePattern, method: deleteapattern()')
   if request.method == 'POST':
     input_data = json.loads(request.data)
     pattern_id = input_data['id']
     operate_user = input_data['user']
     result = obj.del_pattern(pattern_id, operate_user)
+    return jsonify({'status': result})
+
+@app.route('/testSQLPattern', methods=['GET','POST'])
+def testsqlpattern():
+  logging.info('API: /testSQLPattern, method: testsqlpattern()')
+  if request.method == 'POST':
+    pattern_id = request.data
+    result = obj.test_sql_pattern(pattern_id)
+    return jsonify({'status': result})
+
+@app.route('/testSQLPatternDraft', methods=['GET','POST'])
+def testsqlpatterndraft():
+  logging.info('API: /testSQLPatternDraft, method: testsqlpatterndraft()')
+  if request.method == 'POST':
+    input_data = json.loads(request.data)
+    result = obj.test_sql_pattern_draft(input_data)
     return jsonify({'status': result})
 
 if __name__ == "__main__":

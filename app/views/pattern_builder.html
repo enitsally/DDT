@@ -177,8 +177,8 @@
                           <th>Owner</th>
                           <th>Updated Date</th>
                           <th>Content</th>
-                          <th>Conditions</th>
-                          <th>Selections</th>
+                          <th>Condition</th>
+                          <th>Selection</th>
                           <th>User List</th>
                           <th>Attach List</th>
                           <th>Actions</th>
@@ -203,7 +203,7 @@
                             <button class="btn" ng-click="deletePattern(pattern._id)">
                             <span class="glyphicon glyphicon-remove"></span>&nbsp;&nbsp;Delete
                             </button>
-                            <button class="btn" ng-click="testPattern(pattern._id)">
+                            <button class="btn" ng-if = "pattern.pattern_type == 'SQL'" ng-click="testPattern(pattern._id)">
                             <span class="glyphicon glyphicon-play-circle"></span>&nbsp;&nbsp;Test
                             </button>
                           </td>
@@ -240,16 +240,20 @@
             </md-card>
             <md-card flex = "50">
               <md-card-content layout = "column">
+                <div layout = "row">
+                  <span flex></span>
+                  <md-button class="md-primary md-hue-1" ng-click="doClearText()">Clear</md-button>
+                  <md-button class="md-primary md-hue-1" ng-click="doTestPatternDraft()">Test</md-button>
+                </div>
                 Pattern Text:
                 <textarea ng-model="newcreation.pattern_text" style = "height:250px; overflow:scroll;"></textarea>
                 <br/>
                 <div layout = "row">
-                  <md-button class="md-primary md-hue-1" ng-click="doClearText()">Clear</md-button>
-                  <span flex></span>
-                  <md-button class="md-accent" ng-click="doAttachUserGroup()">User Groups ({{newcreation.user_open_list.length}})</md-button>
-                  <md-button class="md-accent" ng-click="doAttachExtension()">Extensions ({{newcreation.extended_func_list.length}})</md-button>
+                  <md-button class="md-accent" ng-click="doAttachCondition()">Condition ({{newcreation.condition_list.length}})</md-button>
+                  <md-button class="md-accent" ng-click="doAttachSelection()">Selection ({{newcreation.selection_list.length}})</md-button>
+                  <md-button class="md-accent" ng-click="doAttachUserGroup()">User ({{newcreation.user_open_list.length}})</md-button>
+                  <md-button class="md-accent" ng-click="doAttachExtension()">Extension ({{newcreation.extended_func_list.length}})</md-button>
                   <md-button class="md-accent" ng-click="doAttachFiles()">Attach ({{newcreation.attach_list.length}})</md-button>
-
                 </div>
               </md-card-content>
             </md-card>

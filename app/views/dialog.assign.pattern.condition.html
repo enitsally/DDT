@@ -1,0 +1,94 @@
+<md-dialog aria-label="Query Pattern Condition Assignment" flex = "45">
+
+
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Assign Condition to Query Pattern: <code>{{newcreation.pattern_descr}}</code></h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon md-svg-src="images/icon/close.svg" aria-label="Close dialog"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+
+      <div layout = "row" flex>
+        <div>
+          <md-card>
+            <md-card-title>
+              <br>
+              <button class="btn btn-success" ng-click="editRow_condtion('N', '', '')">
+                <span class="glyphicon glyphicon-user"></span> Create New Condition
+              </button>
+            </md-card-title>
+            <md-card-content>
+              <div ng-hide = "hideform_condition" flex>
+                <h4 ng-show="edit_condition">Create New Condition:</h4>
+                <h4 ng-hide="edit_condition">Edit Condition:</h4>
+                <md-input-container>
+                  <label>Condition SubArea:</label>
+                  <input ng-model="currentRow_condition.name" >
+                </md-input-container>
+
+                <md-input-container>
+                  <label>Description:</label>
+                  <input ng-model="currentRow_condition.descr" >
+                </md-input-container>
+                <hr>
+                <button class="btn btn-success"  ng-click="saveNew_condition()" ng-show="edit_condition">
+                  <span class="glyphicon glyphicon-save"></span> Add Condition
+                </button>
+                <button class="btn btn-success"  ng-click="saveEdit_condition(currentRow_condition.row_id)" ng-hide="edit_condition">
+                  <span class="glyphicon glyphicon-save"></span> Save change
+                </button>
+              </div>
+            </md-card-content>
+        </md-card>
+      </div>
+      <div></div>
+      <div>
+        <md-card>
+          <md-card-title layout="row" layout-align="center center">
+            <h5><strong>Condition List </strong></h5><div ng-show= "newcreation.condition_list.length"><h5><strong>({{newcreation.condition_list.length}})</strong></h5></div>
+          </md-card-title>
+          <md-card-content>
+            <md-content flex layout-padding style="height: 500px">
+              <span flex>
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Condition</th>
+                      <th>Description</th>
+                      <th>Edit</th>
+                      <th>Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="row in newcreation.condition_list">
+                      <td>{{row.name}}</td>
+                      <td>{{row.descr}}</td>
+                      <td>
+                        <button class="btn" ng-click="editRow_condtion($index,row.name,row.descr)">
+                        <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Edit
+                        </button>
+                      </td>
+                      <td>
+                        <button class="btn" ng-click="deleteRow_condition($index)">
+                        <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Delete
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              <span>
+            </md-content>
+          </md-card-content>
+        </md-card>
+      </div>
+
+    </div>
+
+
+    </md-dialog-content>
+</md-dialog>

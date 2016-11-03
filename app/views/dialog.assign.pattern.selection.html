@@ -1,0 +1,95 @@
+<md-dialog aria-label="Query Pattern Selection Assignment" flex = "45">
+
+
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Assign Selection to Query Pattern: <code>{{newcreation.pattern_descr}}</code></h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon md-svg-src="images/icon/close.svg" aria-label="Close dialog"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+
+
+      <div layout = "row" flex>
+        <div>
+          <md-card>
+            <md-card-title>
+              <br>
+              <button class="btn btn-success" ng-click="editRow_selection('N', '', '')">
+                <span class="glyphicon glyphicon-user"></span> Create New Selection
+              </button>
+            </md-card-title>
+            <md-card-content>
+              <div ng-hide = "hideform_selection" flex>
+                <h4 ng-show="edit_selection">Create New Selection:</h4>
+                <h4 ng-hide="edit_selection">Edit Selection:</h4>
+                <md-input-container>
+                  <label>Selection SubArea:</label>
+                  <input ng-model="currentRow_selection.col_name" >
+                </md-input-container>
+
+                <md-input-container>
+                  <label>Alias Name:</label>
+                  <input ng-model="currentRow_selection.nick_name" >
+                </md-input-container>
+                <hr>
+                <button class="btn btn-success"  ng-click="saveNew_selection()" ng-show="edit_selection">
+                  <span class="glyphicon glyphicon-save"></span> Add Selection
+                </button>
+                <button class="btn btn-success"  ng-click="saveEdit_selection(currentRow_selection.row_id)" ng-hide="edit_selection">
+                  <span class="glyphicon glyphicon-save"></span> Save change
+                </button>
+              </div>
+            </md-card-content>
+        </md-card>
+      </div>
+      <div></div>
+      <div>
+        <md-card>
+          <md-card-title layout="row" layout-align="center center">
+            <h5><strong>Selection List </strong></h5><div ng-show= "newcreation.selection_list.length"><h5><strong>({{newcreation.selection_list.length}})</strong></h5></div>
+          </md-card-title>
+          <md-card-content>
+            <md-content flex layout-padding style="height: 500px">
+              <span flex>
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Selection Name</th>
+                      <th>Alias Name</th>
+                      <th>Edit</th>
+                      <th>Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="row in newcreation.selection_list">
+                      <td>{{row.col_name}}</td>
+                      <td>{{row.nick_name}}</td>
+                      <td>
+                        <button class="btn" ng-click="editRow_selection($index,row.col_name,row.nick_name)">
+                        <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Edit
+                        </button>
+                      </td>
+                      <td>
+                        <button class="btn" ng-click="deleteRow_selection($index)">
+                        <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Delete
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              <span>
+            </md-content>
+          </md-card-content>
+        </md-card>
+      </div>
+
+    </div>
+
+
+    </md-dialog-content>
+</md-dialog>
