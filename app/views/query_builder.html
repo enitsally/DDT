@@ -1,1 +1,257 @@
-This is query_builder page. 
+<style>
+    .my-drop-zone { border: dotted 3px lightgray; }
+    .nv-file-over { border: dotted 3px red; } /* Default class applied to drop zones on over */
+    .another-file-over-class { border: dotted 3px green; }
+    .checkboxdemoSyncing .checkboxDemo1 div { clear: both; }
+    .checkboxdemoSyncing legend { color: #3F51B5; }
+    .checkboxdemoSyncing legend code {  color: #3F51B5;
+                                        font-weight: normal; }
+    .checkboxdemoSyncing p { padding-left: 8px; }
+    .checkboxdemoSyncing .info { padding-left: 13px; }
+    .checkboxdemoSyncing div.standard { padding: 8px;
+                                        padding-left: 15px; }
+    .checkboxdemoSyncing fieldset.standard {  border-style: solid;
+                                              border-width: 1px;
+                                              height: 100%; }
+    .autocomplete-custom-template li {
+      border-bottom: 1px solid #ccc;
+      height: auto;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      white-space: normal; }
+
+    .autocomplete-custom-template li:last-child {
+      border-bottom-width: 0; }
+
+    .autocomplete-custom-template .item-title,
+    .autocomplete-custom-template .item-metadata {
+      display: block;
+      line-height: 2; }
+
+    .autocomplete-custom-template .item-title md-icon {
+      height: 18px;
+      width: 18px; }
+
+    .checkboxdemoSyncing .checkboxDemo1 div {
+      clear: both; }
+
+    .checkboxdemoSyncing legend {
+      color: #3F51B5; }
+
+    .checkboxdemoSyncing legend code {
+      color: #3F51B5;
+      font-weight: normal; }
+
+    .checkboxdemoSyncing p {
+      padding-left: 8px; }
+
+    .checkboxdemoSyncing .info {
+      padding-left: 13px; }
+
+    .checkboxdemoSyncing div.standard {
+      padding: 8px;
+      padding-left: 15px; }
+
+    .checkboxdemoSyncing fieldset.standard {
+      border-style: solid;
+      border-width: 1px;
+      height: 100%; }
+
+    html, body { height: 100%; }
+    table, th , td {
+        border-collapse: collapse;
+        padding: 5px;
+    }
+
+    table tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #ffffff;
+    }
+
+    a {
+    position: relative;
+    }
+
+
+
+</style>
+
+
+<br>
+<div layout = "row">
+  <div flex="5"></div>
+  <form flex = "90" layout = "row">
+    <span class="md-headline">Query Builder</span>
+    <span flex></span>
+    <md-button class="md-primary md-raised" ng-click="doSearchPattern()">Search</md-button>
+    <md-button class="md-primary md-raised" ng-click="doSaveQuery()">Save</md-button>
+      <div layout="row" layout-align="end center">
+        <span flex></span>
+        <md-button ng-click="doResetInput()">Reset</md-button>
+      </div>
+  </form>
+</div>
+<div layout="column" ng-cloak="">
+  <md-content class="md-padding" layout="row">
+    <div flex="5"></div>
+    <form flex="90">
+      <md-tabs md-dynamic-height md-border-bottom >
+        <md-tab md-on-select = "setIndex(0)" label="Adhoc Query">
+          <md-card>
+            <md-card-content layout="column">
+              <div layout = "row">
+                <md-card flex = "20">
+                  <md-card-content layout="column">
+                      <h3>Select query file</h3> (text are accepted)
+                      <div>
+                      </div>
+                      <br/>
+                      <div ng-show="queryUploader.isHTML5">
+                          <div nv-file-drop="" uploader="queryUploader" >
+                            <div class="well my-drop-zone" nv-file-over="" uploader="queryUploader">
+                              Files drop zone
+                            </div>
+                          </div>
+                      </div>
+                      <br/>
+                      <div class="col-md-3" flex>
+                        Single
+                        <input type="file" nv-file-select="" uploader="queryUploader"/><br/>
+                      </div>
+                  </md-card-content>
+                </md-card>
+                <md-card flex = "50">
+                  <md-card-content layout = "column">
+                    <div layout = "row">
+                      <span flex></span>
+                      <md-button class="md-primary md-hue-1" ng-click="doClearText()">Clear</md-button>
+                      <md-button class="md-primary md-hue-1" ng-click="doTestQuery()">Test</md-button>
+                    </div>
+                    Query Text:
+                    <textarea ng-model="newquery.query_text" style = "height:250px; overflow:scroll;"></textarea>
+                    <br>
+                    Meta-Data Overview
+
+                  </md-card-content>
+                </md-card>
+                <md-card flex = "20">
+                  <md-card-content layout = "column">
+                    <div>
+                        Connection ID:
+                        <md-autocomplete
+                          ng-disabled="false"
+                          md-no-cache="true"
+                          md-selected-item="newquery.conn_key"
+                          md-search-text-change="searchTextChange(searchText_new)"
+                          md-search-text="searchText_new"
+                          md-selected-item-change="selectedConnKeyChange(item)"
+                          md-items="item in querySearch(searchText_new)"
+                          md-item-text="item.conn_key"
+                          md-min-length="0"
+                          placeholder="Pick an Connection ID"
+                          md-menu-class="autocomplete-custom-template">
+                          <md-item-template>
+                            <span class="item-title">
+                              <md-icon md-svg-icon="images/icon/octicon-repo.svg"></md-icon>
+                                <!-- <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">{{item.conn_key}}<div data-toggle="tooltip" ng-show="showPopover">{{item.desc}}</div></a> -->
+                                <span>{{item.conn_key}}</span>
+                            </span>
+
+                            <span class="item-metadata">
+                               <span class="item-metastat">
+                                 <p style="font-size:10px">{{item.desc}}</p>
+                               </span>
+                             </span>
+                          </md-item-template>
+                        </md-autocomplete>
+                      </div>
+                      <br/>
+                      <div>
+                        Query Description:
+                        <md-input-container md-no-float class="md-block">
+                          <input ng-model="newquery.descr" placeholder="Query Description">
+                        </md-input-container>
+                      </div>
+                  </md-card-content>
+                </md-card>
+              </div>
+            </md-card-content>
+          </md-card>
+        </md-tab>
+        <md-tab md-on-select = "setIndex(1)" label="Pattern Query">
+          <div layout = "row">
+            <md-card flex = "20">
+              <md-card-content layout="column">
+                  <h3>Select One Pattern </h3>
+                  <div class="bar">
+                    <input type="text" class="search" ng-model="searchString" placeholder="Enter your search terms" />
+                  </div>
+                  <br/>
+              </md-card-content>
+            </md-card>
+            <md-card flex = "50">
+              <md-card-content layout = "column">
+                <div layout = "row">
+                  <span flex></span>
+                  <md-button class="md-primary md-hue-1" ng-click="doClearText()">Clear</md-button>
+                  <md-button class="md-primary md-hue-1" ng-click="doTestPatternDraft()">Test</md-button>
+                </div>
+                Pattern Text:
+                <textarea ng-model="newcreation.pattern_text" style = "height:250px; overflow:scroll;"></textarea>
+                <br/>
+                <div layout = "row">
+                  <md-button class="md-accent" ng-click="doSetCondition()">Condition ({{selectedpattern.condition_list.length}})</md-button>
+                  <md-button class="md-accent" ng-click="doSetSelection()">Selection ({{selectedpattern.selection_list.length}})</md-button>
+                </div>
+              </md-card-content>
+            </md-card>
+            <md-card flex = "20">
+              <md-card-content layout = "column">
+                <div>
+                    Connection ID:
+                    <md-autocomplete
+                      ng-disabled="false"
+                      md-no-cache="true"
+                      md-selected-item="newcreation.conn_key"
+                      md-search-text-change="searchTextChange(searchText_new)"
+                      md-search-text="searchText_new"
+                      md-selected-item-change="selectedConnKeyChange(item)"
+                      md-items="item in querySearch(searchText_new)"
+                      md-item-text="item.conn_key"
+                      md-min-length="0"
+                      placeholder="Pick an Connection ID"
+                      md-menu-class="autocomplete-custom-template">
+                      <md-item-template>
+                        <span class="item-title">
+                          <md-icon md-svg-icon="images/icon/octicon-repo.svg"></md-icon>
+                            <!-- <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">{{item.conn_key}}<div data-toggle="tooltip" ng-show="showPopover">{{item.desc}}</div></a> -->
+                            <span>{{item.conn_key}}</span>
+                        </span>
+
+                        <span class="item-metadata">
+                           <span class="item-metastat">
+                             <p style="font-size:10px">{{item.desc}}</p>
+                           </span>
+                         </span>
+                      </md-item-template>
+                    </md-autocomplete>
+                  </div>
+                  <br/>
+                  <div>
+                    Pattern Description:
+                    <md-input-container md-no-float class="md-block">
+                      <input ng-model="newcreation.pattern_descr" placeholder="Pattern Description">
+                    </md-input-container>
+                  </div>
+              </md-card-content>
+            </md-card>
+          </div>
+        </md-tab>
+      </md-tabs>
+    </form>
+    <div flex="5"></div>
+  </md-content>
+</div>

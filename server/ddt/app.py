@@ -333,6 +333,27 @@ def testsqlpatterndraft():
     result = obj.test_sql_pattern_draft(input_data)
     return jsonify({'status': result})
 
+@app.route('/checkQueryTextFile', methods=['GET', 'POST'])
+def checkquerytextfile():
+  logging.info('API: /checkQueryTextFile, method: checkquerytextfile()')
+  if request.method == 'POST':
+    file = request.files['file']
+    file_name = file.filename
+    file.seek(0)
+    txtContent = file.read()
+    return jsonify({'status': txtContent})
+
+
+
+@app.route('/testSQLQuery', methods=['GET','POST'])
+def testsqlquery():
+  logging.info('API: /testSQLQuery, method: testsqlquery()')
+  if request.method == 'POST':
+    input_data = json.loads(request.data)
+    result = obj.test_sql_query(input_data)
+    return jsonify({'status': result})
+
+
 if __name__ == "__main__":
   # logging.config.fileConfig('logging.conf')
   app.run(debug=True)

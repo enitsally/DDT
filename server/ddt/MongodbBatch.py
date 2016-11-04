@@ -558,6 +558,39 @@ class mongodbbatch:
       mgs = "Pattern doesn't exist."
     return {'status': status, 'mgs': mgs}
 
+
+  def test_sql_query(self, input_data):
+    status = False
+    mgs = 'Query test passed.'
+    text = ''
+
+    if input_data is not None:
+      text = input_data.get('query_text')
+      conn_key = input_data.get('conn_key').get('conn_key')
+
+      if len(text) > 0:
+        if text[len(text) - 1:] == ';':
+          text = text[:len(text) - 1]
+        sql = text + ' limit 1;'
+
+        conn_info = self.get_connection_key(CON_COLLECTION_NAME, conn_key)
+
+        db = Connector(conn_info)
+        conn = db.get_connection()
+        if type(conn) == str:
+          mgs = conn
+        else:
+          try:
+            conn.execute(sql)
+          except sqlalchemy.exc.StatementError, exc:
+            status = False
+            mgs = exc.message
+          finally:
+            conn.close()
+    else:
+      mgs = "Query doesn't have text."
+    return {'status': status, 'mgs': mgs}
+
   def create_condition(self, text, condition, inputs):
     if len(inputs) > 0:
       for input in inputs:

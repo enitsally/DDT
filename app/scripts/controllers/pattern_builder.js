@@ -299,7 +299,7 @@ angular.module('ddtApp')
       };
 
 
-      $scope.editRow_selection = function(flag, col_name, nick_name) {
+    $scope.editRow_selection = function(flag, col_name, nick_name) {
             $scope.hideform_selection = false;
             if (flag === 'N') {
               $scope.edit_selection = true;
@@ -312,7 +312,7 @@ angular.module('ddtApp')
             }
           };
 
-      $scope.saveEdit_selection = function (index){
+    $scope.saveEdit_selection = function (index){
             if (index > -1) {
               var tmp = {
                 'col_name':$scope.currentRow_selection.col_name,
