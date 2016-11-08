@@ -1,0 +1,52 @@
+<md-dialog aria-label="Query Pattern Selection Setup" flex = "45">
+
+
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Setup Condition to Query Pattern: <code>{{newquerybypattern.pattern_descr}}</code></h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon md-svg-src="images/icon/close.svg" aria-label="Close dialog"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+
+      <div layout = "row" flex>
+        <md-card>
+          <md-card-title layout="row" layout-align="center center">
+            <h5><strong>Selection List </strong></h5><div ng-show= "newquerybypattern.selection_list.length"><h5><strong>({{newquerybypattern.selection_list.length}})</strong></h5></div>
+          </md-card-title>
+          <md-card-content>
+            <md-content flex layout-padding style="height: 500px">
+              <span flex>
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Selection</th>
+                      <th>Alias Name</th>
+                      <th>Selected</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="row in newquerybypattern.selection_list">
+                      <td>{{row.col_name}}</td>
+                      <td>{{row.nick_name}}</td>
+                      <td>
+                        <md-checkbox ng-model="row.value" aria-label="Checkbox 1">
+                        </md-checkbox>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+{{newquerybypattern.selection_list}}
+              <span>
+            </md-content>
+          </md-card-content>
+        </md-card>
+    </div>
+
+
+    </md-dialog-content>
+</md-dialog>

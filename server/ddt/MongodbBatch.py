@@ -634,6 +634,20 @@ class mongodbbatch:
 
     return text
 
+  def get_user_group(self, user):
+    group_list = [k.get('group_name') for k in self.db[USER_GROUP_COLLECTION_NAME].find({'members': user}, {'_id': 0, 'group_name': 1})]
+    return group_list
+
+  def get_pattern_summary_by_user(self,user):
+    group_list = self.get_user_group(user)
+    group_list.append(user)
+    result = list(self.db[SYS_PATTERN_NAME].find({'user_open_list.name': {'$in': group_list}, 'pattern_type': 'SQL'}))
+    for r in result:
+      r['_id'] = str(r.get('_id'))
+
+    return result
+
+
   def find_between(s, first, last):
     try:
       start = s.index(first) + len(first)
@@ -652,10 +666,11 @@ class mongodbbatch:
 # def main():
 #     obj = mongodbbatch(host="172.18.60.20", port="27017", db="DDDB")
 #     fs = gridfs.GridFS(obj.get_db())
-#     obj.get_stored_attach_file_id(SYS_PATTERN_NAME)
-#
-#
-#
-#
-# if __name__ == '__main__':
-#     main()
+#     result = obj.get_user_group('yue.ming@wdc.com')
+#     print result
+
+
+
+
+if __name__ == '__main__':
+    main()

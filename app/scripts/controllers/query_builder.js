@@ -2,12 +2,14 @@
 
 
 angular.module('ddtApp')
-  .controller('queryBuilderCtrl', function ($log, $q, $scope, $rootScope, $mdDialog, $http, $state, $mdToast, AUTH_EVENTS, AuthService, FileUploader, IdleService) {
+  .controller('queryBuilderCtrl', function ($log, $q, $scope, $rootScope, $mdDialog, $http, $state, $mdToast, $mdMedia, AUTH_EVENTS, AuthService, FileUploader, IdleService) {
 
     $scope.customFullscreen = false;
     $scope.selectedConnKey = [];
     $scope.searchText = '';
-    $scope.showPopover=false;
+    $scope.searchText_new = '';
+    $scope.showPopover = false;
+    $scope.query_user = $scope.currentUser ? $scope.currentUser.id : '',
 
 
     $scope.newquery = {
@@ -15,6 +17,17 @@ angular.module('ddtApp')
       query_text: '',
       conn_key : '',
       query_descr: '',
+    }
+
+    $scope.newquerybypattern = {
+      creation_user : $scope.currentUser ? $scope.currentUser.id : '',
+      query_text: '',
+      conn_key : '',
+      query_descr: '',
+      condition_list : [],
+      selection_list : [],
+      pattern_id: '',
+      pattern_descr: ''
     }
     $scope.queryUploader = new FileUploader({
       url: 'http://localhost:5000/checkQueryTextFile',
@@ -61,6 +74,13 @@ angular.module('ddtApp')
       }
     };
 
+    $http.post('http://localhost:5000/getPatternSummaryByUser', $scope.query_user).then(function(response){
+        $scope.patternInfo = response.data.status;
+        console.log($scope.patternInfo);
+    }, function (){
+
+    });
+
 
     $scope.setIndex = function (index){
       $scope.selectedIndex = index;
@@ -74,6 +94,69 @@ angular.module('ddtApp')
     $scope.selectedConnKeyChange = function(item) {
       $log.info('Conn Key changed to ' + JSON.stringify(item));
     };
+
+    $scope.selectedPatternChange = function(item) {
+      if (item !== undefined){
+        $scope.newquerybypattern.query_text = item.pattern_text;
+        $scope.newquerybypattern.selection_list = item.selection_subArea;
+        $scope.newquerybypattern.condition_list = item.condition_subArea;
+        $scope.newquerybypattern.conn_key = item.connection_key;
+        $scope.newquerybypattern.pattern_id = item._id;
+        $scope.newquerybypattern.pattern_descr = item.pattern_descr;
+      }
+
+    };
+
+    $scope.doSetCondition = function(){
+
+      var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+      $mdDialog.show({
+            controller: DialogController,
+            templateUrl: 'views/dialog.set.pattern.condition.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose: false,
+            fullscreen: useFullScreen,
+            locals:{
+              result: $scope.newquerybypattern
+
+            },
+            scope: $scope,
+            preserveScope: true
+          });
+
+    };
+
+    $scope.doSetSelection = function(){
+
+      var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+      $mdDialog.show({
+            controller: DialogController,
+            templateUrl: 'views/dialog.set.pattern.selection.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose: false,
+            fullscreen: useFullScreen,
+            locals:{
+              result: $scope.newquerybypattern
+
+            },
+            scope: $scope,
+            preserveScope: true
+          });
+
+    };
+
+    function DialogController($scope, $mdDialog, result) {
+      $scope.save_result = result;
+      $scope.hide = function() {
+        $mdDialog.hide();
+      };
+      $scope.cancel = function() {
+        $mdDialog.cancel();
+      };
+      $scope.answer = function(answer) {
+        $mdDialog.hide(answer);
+      };
+  };
 
     $scope.querySearch  = function(query) {
       var results = query ? $scope.conn_keys_respo.filter( createFilterFor(query) ) : $scope.conn_keys_respo,
@@ -89,11 +172,28 @@ angular.module('ddtApp')
       return results;
     };
 
+    $scope.querySearchByPattern  = function(query) {
+      var results = query ? $scope.patternInfo.filter( createFilterForPattern(query) ) : $scope.patternInfo,
+          deferred;
+
+      return results;
+    };
+
     function createFilterFor(query) {
       var uppercaseQuery = angular.uppercase(query);
 
       return function filterFn(item) {
         return (item.conn_key.indexOf(uppercaseQuery) === 0);
+      };
+
+    };
+
+    function createFilterForPattern(query) {
+
+      var uppercaseQuery = angular.uppercase(query);
+
+      return function filterFn(item) {
+        return (item.pattern_descr.indexOf(uppercaseQuery) === 0);
       };
 
     };
@@ -111,4 +211,19 @@ angular.module('ddtApp')
        );
     };
 
+})
+.filter('searchFor', function(){
+    return function(arr, searchString){
+        if(!searchString){
+            return arr;
+        }
+        var result = [];
+        searchString = searchString.toLowerCase();
+        angular.forEach(arr, function(item){
+            if(item.pattern_descr.toLowerCase().indexOf(searchString) !== -1){
+            result.push(item);
+        }
+        });
+        return result;
+    };
 });

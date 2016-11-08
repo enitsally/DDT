@@ -1,0 +1,51 @@
+<md-dialog aria-label="Query Pattern Condition Setup" flex = "45">
+
+
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Setup Condition to Query Pattern: <code>{{newquerybypattern.pattern_descr}}</code></h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon md-svg-src="images/icon/close.svg" aria-label="Close dialog"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+
+      <div layout = "row" flex>
+        <md-card>
+          <md-card-title layout="row" layout-align="center center">
+            <h5><strong>Condition List </strong></h5><div ng-show= "newquerybypattern.condition_list.length"><h5><strong>({{newquerybypattern.condition_list.length}})</strong></h5></div>
+          </md-card-title>
+          <md-card-content>
+            <md-content flex layout-padding style="height: 500px">
+              <span flex>
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Condition</th>
+                      <th>Description</th>
+                      <th>Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="row in newquerybypattern.condition_list">
+                      <td>{{row.name}}</td>
+                      <td>{{row.descr}}</td>
+                      <td>
+                        <input required name="value" ng-model="row.value" />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+              <span>
+            </md-content>
+          </md-card-content>
+        </md-card>
+    </div>
+
+
+    </md-dialog-content>
+</md-dialog>

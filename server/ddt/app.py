@@ -343,8 +343,6 @@ def checkquerytextfile():
     txtContent = file.read()
     return jsonify({'status': txtContent})
 
-
-
 @app.route('/testSQLQuery', methods=['GET','POST'])
 def testsqlquery():
   logging.info('API: /testSQLQuery, method: testsqlquery()')
@@ -353,6 +351,14 @@ def testsqlquery():
     result = obj.test_sql_query(input_data)
     return jsonify({'status': result})
 
+@app.route('/getPatternSummaryByUser', methods = ['GET','POST'])
+def getpatternsummarybyuser():
+  logging.info('API: /getPatternSummaryByUser, method: getpatternsummarybyuser()')
+  if request.method == 'POST':
+    user_name = request.data
+    result = obj.get_pattern_summary_by_user(user_name)
+
+    return jsonify({'status': result})
 
 if __name__ == "__main__":
   # logging.config.fileConfig('logging.conf')

@@ -172,7 +172,7 @@
                       <div>
                         Query Description:
                         <md-input-container md-no-float class="md-block">
-                          <input ng-model="newquery.descr" placeholder="Query Description">
+                          <input ng-model="newquery.query_descr" placeholder="Query Description">
                         </md-input-container>
                       </div>
                   </md-card-content>
@@ -186,9 +186,35 @@
             <md-card flex = "20">
               <md-card-content layout="column">
                   <h3>Select One Pattern </h3>
-                  <div class="bar">
-                    <input type="text" class="search" ng-model="searchString" placeholder="Enter your search terms" />
-                  </div>
+                  <md-autocomplete
+                    ng-disabled="false"
+                    md-no-cache="true"
+                    md-selected-item="newquerybypattern._id"
+                    md-search-text-change="searchTextChange(searchText_descr)"
+                    md-search-text="searchText_descr"
+                    md-selected-item-change="selectedPatternChange(i)"
+                    md-items="i in patternInfo | searchFor:searchText_descr"
+                    md-item-text="i.pattern_descr"
+                    md-min-length="0"
+                    placeholder="Pick an Pattern"
+                    md-menu-class="autocomplete-custom-template">
+                    <md-item-template>
+                      <span class="item-title">
+                        <md-icon md-svg-icon="images/icon/octicon-repo.svg"></md-icon>
+                          <!-- <a ng-mouseover="showPopover=true;" ng-mouseleave="showPopover=false;">{{item.conn_key}}<div data-toggle="tooltip" ng-show="showPopover">{{item.desc}}</div></a> -->
+                          <span>{{i.pattern_descr}}</span>
+                      </span>
+
+                      <span class="item-metadata">
+                         <span class="item-metastat">
+                           <p style="font-size:10px">Owner: {{i.created_user}}</p>
+                           <p style="font-size:10px">Created: {{i.created_date}}</p>
+                           <p style="font-size:10px">Id: {{i._id}}</p>
+                         </span>
+                       </span>
+                    </md-item-template>
+                  </md-autocomplete>
+
                   <br/>
               </md-card-content>
             </md-card>
@@ -197,14 +223,14 @@
                 <div layout = "row">
                   <span flex></span>
                   <md-button class="md-primary md-hue-1" ng-click="doClearText()">Clear</md-button>
-                  <md-button class="md-primary md-hue-1" ng-click="doTestPatternDraft()">Test</md-button>
+                  <md-button class="md-primary md-hue-1" ng-click="doTestQuery()">Test</md-button>
                 </div>
                 Pattern Text:
-                <textarea ng-model="newcreation.pattern_text" style = "height:250px; overflow:scroll;"></textarea>
+                <textarea ng-model="newquerybypattern.query_text" style = "height:250px; overflow:scroll;"></textarea>
                 <br/>
                 <div layout = "row">
-                  <md-button class="md-accent" ng-click="doSetCondition()">Condition ({{selectedpattern.condition_list.length}})</md-button>
-                  <md-button class="md-accent" ng-click="doSetSelection()">Selection ({{selectedpattern.selection_list.length}})</md-button>
+                  <md-button class="md-accent" ng-click="doSetCondition()">Condition ({{newquerybypattern.condition_list.length}})</md-button>
+                  <md-button class="md-accent" ng-click="doSetSelection()">Selection ({{newquerybypattern.selection_list.length}})</md-button>
                 </div>
               </md-card-content>
             </md-card>
@@ -215,11 +241,11 @@
                     <md-autocomplete
                       ng-disabled="false"
                       md-no-cache="true"
-                      md-selected-item="newcreation.conn_key"
-                      md-search-text-change="searchTextChange(searchText_new)"
-                      md-search-text="searchText_new"
+                      md-selected-item="newquerybypattern.conn_key"
+                      md-search-text-change="searchTextChange(searchText)"
+                      md-search-text="searchText"
                       md-selected-item-change="selectedConnKeyChange(item)"
-                      md-items="item in querySearch(searchText_new)"
+                      md-items="item in querySearch(searchText)"
                       md-item-text="item.conn_key"
                       md-min-length="0"
                       placeholder="Pick an Connection ID"
@@ -241,9 +267,9 @@
                   </div>
                   <br/>
                   <div>
-                    Pattern Description:
+                    Query Description:
                     <md-input-container md-no-float class="md-block">
-                      <input ng-model="newcreation.pattern_descr" placeholder="Pattern Description">
+                      <input ng-model="newquerybypattern.query_descr" placeholder="Query Description">
                     </md-input-container>
                   </div>
               </md-card-content>
