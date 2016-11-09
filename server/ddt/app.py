@@ -351,6 +351,19 @@ def testsqlquery():
     result = obj.test_sql_query(input_data)
     return jsonify({'status': result})
 
+@app.route('/createSQLByPattern', methods = ['GET', 'POST'])
+def createsqlbypattern():
+  logging.info('API: /createSQLByPattern, method: createsqlbypattern()')
+  if request.method == 'POST':
+    input_data = json.loads(request.data)
+    query_text = input_data.get('query_text')
+    # conn_key = input_data.get('conn_key')
+    condition = input_data.get('condition_list')
+    selection = input_data.get('selection_list')
+    result = obj.create_sql_by_pattern(query_text, condition, selection)
+
+    return jsonify({'status': result})
+
 @app.route('/getPatternSummaryByUser', methods = ['GET','POST'])
 def getpatternsummarybyuser():
   logging.info('API: /getPatternSummaryByUser, method: getpatternsummarybyuser()')

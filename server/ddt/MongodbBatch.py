@@ -487,10 +487,10 @@ class mongodbbatch:
         conn_key = chk.get('connection_key')
         if chk.get('condition_subArea') is not None and len(chk.get('condition_subArea')) > 0:
           condition = chk.get('condition_subArea')
-          text = self.create_condition(text, condition, [])
+          text = self.create_condition(text, condition)
         if chk.get('selection_subArea') is not None and len(chk.get('selection_subArea')) > 0:
           selection = chk.get('selection_subArea')
-          text = self.create_selection(text, selection, [])
+          text = self.create_selection(text, selection)
 
       if len(text) > 0:
         if text[len(text) - 1:] == ';':
@@ -530,10 +530,10 @@ class mongodbbatch:
         conn_key = input_data.get('conn_key').get('conn_key')
         if input_data.get('condition_list') is not None and len(input_data.get('condition_list')) > 0:
           condition = input_data.get('condition_list')
-          text = self.create_condition(text, condition, [])
+          text = self.create_condition(text, condition)
         if input_data.get('selection_list') is not None and len(input_data.get('selection_list')) > 0:
           selection = input_data.get('selection_list')
-          text = self.create_selection(text, selection, [])
+          text = self.create_selection(text, selection)
 
       if len(text) > 0:
         if text[len(text) - 1:] == ';':
@@ -558,6 +558,14 @@ class mongodbbatch:
       mgs = "Pattern doesn't exist."
     return {'status': status, 'mgs': mgs}
 
+  def get_pattern_summary_by_user(self, user):
+    group_list = self.get_user_group(user)
+    group_list.append(user)
+    result = list(self.db[SYS_PATTERN_NAME].find({'user_open_list.name': {'$in': group_list}, 'pattern_type': 'SQL'}))
+    for r in result:
+      r['_id'] = str(r.get('_id'))
+
+    return result
 
   def test_sql_query(self, input_data):
     status = False
@@ -566,7 +574,7 @@ class mongodbbatch:
 
     if input_data is not None:
       text = input_data.get('query_text')
-      conn_key = input_data.get('conn_key').get('conn_key')
+      conn_key = input_data.get('conn_key')
 
       if len(text) > 0:
         if text[len(text) - 1:] == ';':
@@ -591,46 +599,64 @@ class mongodbbatch:
       mgs = "Query doesn't have text."
     return {'status': status, 'mgs': mgs}
 
-  def create_condition(self, text, condition, inputs):
+  def create_sql_by_pattern(self,text, condition, selection):
+    if text is not None and text != "":
+      text = self.create_condition(text, condition)
+      text = self.create_selection(text, selection)
+
+      return text
+
+  def create_condition(self, text, inputs):
     if len(inputs) > 0:
       for input in inputs:
         name = input.get('name')
         value = input.get('value')
         # do replace condition with the input values
-    else:
-      for cond in condition:
-        name = cond.get('name')
+
         condition_name = name[1:]
         cond_type = condition_name.split('_')[0]
-        if cond_type == 'str':
-          text = text.replace(name, "''")
-        elif cond_type == 'int':
-          text = text.replace(name, "1")
-        elif cond_type == 'list':
-          text = text.replace(name, "'',''")
-        elif cond_type == 'boolean':
-          text = text.replace(name, "0")
+        if value is None:
+          if cond_type == 'str':
+            text = text.replace(name, "''")
+          elif cond_type == 'int':
+            text = text.replace(name, "1")
+          elif cond_type == 'list':
+            text = text.replace(name, "'',''")
+          elif cond_type == 'boolean':
+            text = text.replace(name, "0")
+        else:
+          # need action from value
+          if cond_type == 'str':
+            text = text.replace(name, "'{}'".format(value))
+          elif cond_type == 'int':
+            text = text.replace(name, value)
+          elif cond_type == 'list':
+            text = text.replace(name, ','.join(["'{}'".format(x) for x in value.split(',')]))
+          elif cond_type == 'boolean':
+            text = text.replace(name, "1" if value else "0")
+
 
     if text[len(text)-1:] == ';':
       text = text[:len(text)-1]
 
     return text
 
-  def create_selection(self, text, selection, inputs):
+  def create_selection(self, text, inputs):
     selected_column = []
     if len(inputs) > 0:
       text_first_part = self.find_between(text.lower(), 'select', 'from')
-      test_rest_part = self.find_rest('from')
+      text_rest_part = self.find_rest(text.lower(), 'from')
       col_list = [a.lower() for a in text_first_part.split(',')]
 
       for input in inputs:
         name = input.get('col_name')
         value = input.get('nick_name')
-        if name.lower() in col_list:
+        selected = input.get('value')
+        if (selected is None or selected) :
           selected_column.append('{} AS {}'.format(name, value))
 
       str_col = ','.join(selected_column)
-      text = 'select  {} from {} '.format(str_col,test_rest_part)
+      text = 'select  {} from {} '.format(str_col,text_rest_part)
 
     return text
 
@@ -638,7 +664,7 @@ class mongodbbatch:
     group_list = [k.get('group_name') for k in self.db[USER_GROUP_COLLECTION_NAME].find({'members': user}, {'_id': 0, 'group_name': 1})]
     return group_list
 
-  def get_pattern_summary_by_user(self,user):
+  def get_pattern_summary_by_user(self, user):
     group_list = self.get_user_group(user)
     group_list.append(user)
     result = list(self.db[SYS_PATTERN_NAME].find({'user_open_list.name': {'$in': group_list}, 'pattern_type': 'SQL'}))
@@ -648,7 +674,7 @@ class mongodbbatch:
     return result
 
 
-  def find_between(s, first, last):
+  def find_between(self, s, first, last):
     try:
       start = s.index(first) + len(first)
       end = s.index(last, start)
@@ -656,7 +682,7 @@ class mongodbbatch:
     except ValueError:
       return ""
 
-  def find_rest(s, first):
+  def find_rest(self, s, first):
     try:
       start = s.index(first) + len(first)
       return s[start:]

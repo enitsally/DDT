@@ -8,6 +8,7 @@ angular.module('ddtApp')
     $scope.selectedConnKey = [];
     $scope.searchText = '';
     $scope.searchText_new = '';
+    $scope.searchText_descr = '';
     $scope.showPopover = false;
     $scope.query_user = $scope.currentUser ? $scope.currentUser.id : '',
 
@@ -47,17 +48,96 @@ angular.module('ddtApp')
       $scope.newquery.query_text = response.status ;
     };
 
-    $scope.doClearText = function(){
+
+
+    $http.post('http://localhost:5000/getPatternSummaryByUser', $scope.query_user).then(function(response){
+        $scope.patternInfo = response.data.status;
+    }, function (){
+
+    });
+
+
+    $scope.setIndex = function (index){
+      $scope.selectedIndex = index;
+    };
+
+    $scope.doClearQueryText = function(){
       $scope.newquery.query_text = '';
+      $scope.newquery.conn_key = '';
+      $scope.newquery.query_descr = '';
+      $scope.searchText_new = '';
+
       $scope.queryUploader.clearQueue();
     };
 
+    $scope.doClearQueryTextByPattern = function(){
+      $scope.newquerybypattern.query_text = '';
+      $scope.newquerybypattern.conn_key = '';
+      $scope.newquerybypattern.query_descr = '';
+      $scope.newquerybypattern.condition_list = [];
+      $scope.newquerybypattern.selection_list = [];
+      $scope.newquerybypattern.pattern_id = '';
+      $scope.newquerybypattern.pattern_descr = '';
+
+      $scope.searchText_descr = '';
+      $scope.searchText = '';
+
+    };
+
     $scope.doTestQuery = function(){
-      if ($scope.newquery.conn_key === undefined || $scope.newquery.conn_key === ""){
-        $scope.showAlert("Please choose one connection ID");
+      var sql = {
+        query_text : '',
+        conn_key : ''
+      };
+
+      if ($scope.selectedIndex === 0){
+        if ($scope.newquery.conn_key === undefined || $scope.newquery.conn_key === null || $scope.newquery.conn_key === "" || $scope.newquery.conn_key.conn_key === "") {
+          $scope.showAlert("Please choose one connection ID");
+          return;
+        }
+        else{
+          sql.query_text = $scope.newquery.query_text;
+          sql.conn_key = $scope.newquery.conn_key.conn_key;
+        }
       }
-      else{
-        $http.post('http://localhost:5000/testSQLQuery', $scope.newquery).then(function (response){
+      else {
+        if ($scope.newquerybypattern.conn_key === undefined || $scope.newquerybypattern.conn_key === null || $scope.newquerybypattern.conn_key.conn_key === "" || $scope.newquerybypattern.conn_key === "") {
+          $scope.showAlert("Please choose one connection ID");
+          return;
+        }
+        else if ($scope.newquerybypattern.selection_list.length === 0) {
+          if ($scope.newquerybypattern.query_text === ""){
+            $scope.showAlert("Query is empty.");
+            return;
+          }
+          else{
+            var selected_column = [];
+            angular.forEach($scope.newquerybypattern.selection_list, function(item){
+              if (item.value !== undefined){
+                selected_column.push(item);
+              }
+            });
+
+            if (selected_column.length === 0 && selected_column.length !== $scope.newquerybypattern.selection_list.length){
+              $scope.showAlert("Must have at least one selected column");
+              return;
+            }
+          }
+        }
+
+        sql.query_text = $scope.newquerybypattern.query_text;
+        if (typeof $scope.newquerybypattern.conn_key === "string")
+        {
+          sql.conn_key = $scope.newquerybypattern.conn_key ;
+        }
+        else{
+          sql.conn_key = $scope.newquerybypattern.conn_key.conn_key ;
+        }
+
+      }
+
+      if (sql.query_text !== "" && sql.conn_key !== ""){
+        $http.post('http://localhost:5000/testSQLQuery', sql).then(function (response){
           $mdDialog.show(
             $mdDialog.alert()
               .parent(angular.element(document.querySelector('#popupContainer')))
@@ -71,21 +151,35 @@ angular.module('ddtApp')
         }, function(){
 
         });
+
+      }
+      else{
+        $scope.showAlert("Query is empty.");
+      }
+
+    };
+
+    $scope.doSendQuerytoPool = function(){
+
+    };
+
+    $scope.doCreateQueryTextByPattern = function(){
+      if ($scope.newquerybypattern.conn_key === null || $scope.newquerybypattern.conn_key === "" ){
+        $scope.showAlert("Please choose one connection ID");
+        return;
+      }
+      else if ($scope.newquerybypattern.query_text === null || $scope.newquerybypattern.query_text === "" ) {
+        $scope.showAlert("Query text is empty.");
+        return;
+      }
+      else{
+        $http.post('http://localhost:5000/createSQLByPattern', $scope.newquerybypattern).then(function(response){
+            $scope.newquerybypattern.query_text  = response.data.status;
+        })
+
       }
     };
 
-    $http.post('http://localhost:5000/getPatternSummaryByUser', $scope.query_user).then(function(response){
-        $scope.patternInfo = response.data.status;
-        console.log($scope.patternInfo);
-    }, function (){
-
-    });
-
-
-    $scope.setIndex = function (index){
-      $scope.selectedIndex = index;
-      //$scope.onShowPeriodChanged();
-    };
 
     $scope.searchTextChange = function(text) {
       $log.info('Text changed to ' + text);

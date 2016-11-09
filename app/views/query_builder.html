@@ -86,11 +86,10 @@
   <form flex = "90" layout = "row">
     <span class="md-headline">Query Builder</span>
     <span flex></span>
-    <md-button class="md-primary md-raised" ng-click="doSearchPattern()">Search</md-button>
-    <md-button class="md-primary md-raised" ng-click="doSaveQuery()">Save</md-button>
+    <md-button class="md-primary md-raised" ng-click="doSendQuerytoPool()">Run</md-button>
       <div layout="row" layout-align="end center">
         <span flex></span>
-        <md-button ng-click="doResetInput()">Reset</md-button>
+        <md-button ng-click="doTestQuery()">Test</md-button>
       </div>
   </form>
 </div>
@@ -127,8 +126,7 @@
                   <md-card-content layout = "column">
                     <div layout = "row">
                       <span flex></span>
-                      <md-button class="md-primary md-hue-1" ng-click="doClearText()">Clear</md-button>
-                      <md-button class="md-primary md-hue-1" ng-click="doTestQuery()">Test</md-button>
+                      <md-button class="md-primary md-hue-1" ng-click="doClearQueryText()">Clear</md-button>
                     </div>
                     Query Text:
                     <textarea ng-model="newquery.query_text" style = "height:250px; overflow:scroll;"></textarea>
@@ -222,8 +220,8 @@
               <md-card-content layout = "column">
                 <div layout = "row">
                   <span flex></span>
-                  <md-button class="md-primary md-hue-1" ng-click="doClearText()">Clear</md-button>
-                  <md-button class="md-primary md-hue-1" ng-click="doTestQuery()">Test</md-button>
+                  <md-button class="md-primary md-hue-1" ng-click="doClearQueryTextByPattern()">Clear</md-button>
+                  <md-button class="md-primary md-hue-1" ng-click="doCreateQueryTextByPattern()">Create</md-button>
                 </div>
                 Pattern Text:
                 <textarea ng-model="newquerybypattern.query_text" style = "height:250px; overflow:scroll;"></textarea>
