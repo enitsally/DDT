@@ -62,7 +62,7 @@ angular.module('ddtApp')
 
 
     $scope.uploader = new FileUploader({
-      url:'http://localhost:5000/checkConnJsonFile',
+      url:'/checkConnJsonFile',
       queueLimit: 20
     });
 
@@ -204,7 +204,7 @@ angular.module('ddtApp')
 
       $scope.fulllist = [];
 
-      $http.get('http://localhost:5000/getConnectionShort').then(function (response){
+      $http.get('/getConnectionShort').then(function (response){
         $scope.fulllist = response.data.status;
       }, function(){
 
@@ -229,7 +229,7 @@ angular.module('ddtApp')
         start_date: $scope.search.start_date,
         end_date: $scope.search.end_date
       };
-      $http.post('http://localhost:5000/getConnectionSummary', criteria).then(function(response){
+      $http.post('/getConnectionSummary', criteria).then(function(response){
           $scope.connInfo = response.data.status;
       }, function (){
 
@@ -249,7 +249,7 @@ angular.module('ddtApp')
       //   $scope.search.e_d = $scope.search.end_date.getDate();
       // }
       $scope.search.conn_keys = $scope.selectedConnKey;
-      $http.post('http://localhost:5000/getSearchedConnectionSummary', $scope.search).then(function(response){
+      $http.post('/getSearchedConnectionSummary', $scope.search).then(function(response){
           $scope.connInfo = response.data.status;
       }, function (){
 
@@ -259,7 +259,7 @@ angular.module('ddtApp')
     $scope.doSaveDataSet = function(){
       //import json tab
       if ($scope.selectedIndex === 1){
-        $http.post('http://localhost:5000/saveConnJsonFile', $scope.file_log).then(function(response){
+        $http.post('/saveConnJsonFile', $scope.file_log).then(function(response){
             $scope.result_msg = response.data.status;
 
             var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
@@ -288,7 +288,7 @@ angular.module('ddtApp')
 
     $scope.doUpdateDataSet = function(){
       //import json tab
-      $http.post('http://localhost:5000/saveConnJsonFile', $scope.file_log).then(function(response){
+      $http.post('/saveConnJsonFile', $scope.file_log).then(function(response){
           $scope.result_msg = response.data.status;
           $scope.mapped = false;
           if ($scope.result_msg){
@@ -346,7 +346,7 @@ angular.module('ddtApp')
           .cancel('Cancel');
       $mdDialog.show(confirm).then(function() {
 
-        $http.post('http://localhost:5000/deleteConnectionKey', conn_key).then(function (response) {
+        $http.post('/deleteConnectionKey', conn_key).then(function (response) {
           var msg = response.data.status.message;
           $scope.onShowPeriodChanged();
           $scope.showSimpleToast(msg);
@@ -364,7 +364,7 @@ angular.module('ddtApp')
 
     $scope.testDS = function(conn_key){
 
-      $http.post('http://localhost:5000/testConnectionKey', conn_key).then(function(response){
+      $http.post('/testConnectionKey', conn_key).then(function(response){
 
           if (response.data.status.conn){
             $scope.showAlert("Connection test passed.");
@@ -452,7 +452,7 @@ angular.module('ddtApp')
        );
     };
 
-    $http.get('http://localhost:5000/getConnectionShort').then(function (response){
+    $http.get('/getConnectionShort').then(function (response){
       $scope.fulllist = response.data.status;
     }, function(){
 

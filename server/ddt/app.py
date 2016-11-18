@@ -375,4 +375,4 @@ def getpatternsummarybyuser():
 
 if __name__ == "__main__":
   # logging.config.fileConfig('logging.conf')
-  app.run(debug=True)
+  app.run(debug=True, port=8088)

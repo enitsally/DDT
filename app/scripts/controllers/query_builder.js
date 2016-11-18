@@ -31,14 +31,14 @@ angular.module('ddtApp')
       pattern_descr: ''
     }
     $scope.queryUploader = new FileUploader({
-      url: 'http://localhost:5000/checkQueryTextFile',
+      url: '/checkQueryTextFile',
       autoUpload : true,
       removeAfterUpload : true,
       queueLimit: 1
     });
 
 
-    $http.get('http://localhost:5000/getConnectionFull').then(function (response){
+    $http.get('/getConnectionFull').then(function (response){
       $scope.conn_keys_respo = response.data.status;
     }, function(){
 
@@ -50,7 +50,7 @@ angular.module('ddtApp')
 
 
 
-    $http.post('http://localhost:5000/getPatternSummaryByUser', $scope.query_user).then(function(response){
+    $http.post('/getPatternSummaryByUser', $scope.query_user).then(function(response){
         $scope.patternInfo = response.data.status;
     }, function (){
 
@@ -137,7 +137,7 @@ angular.module('ddtApp')
       }
 
       if (sql.query_text !== "" && sql.conn_key !== ""){
-        $http.post('http://localhost:5000/testSQLQuery', sql).then(function (response){
+        $http.post('/testSQLQuery', sql).then(function (response){
           $mdDialog.show(
             $mdDialog.alert()
               .parent(angular.element(document.querySelector('#popupContainer')))
@@ -173,7 +173,7 @@ angular.module('ddtApp')
         return;
       }
       else{
-        $http.post('http://localhost:5000/createSQLByPattern', $scope.newquerybypattern).then(function(response){
+        $http.post('/createSQLByPattern', $scope.newquerybypattern).then(function(response){
             $scope.newquerybypattern.query_text  = response.data.status;
         })
 

@@ -5,7 +5,7 @@ angular.module('ddtApp')
   .controller('helpCtrl', function ($scope, $rootScope, $http, $state, $mdToast, $mdDialog,AUTH_EVENTS, AuthService, IdleService) {
 
     $scope.doClearDoc = function(){
-      $http.post('http://localhost:5000/clearAllDoc').then(function(response){
+      $http.post('/clearAllDoc').then(function(response){
 
           var message = 'Deleted file number: ' + response.data.status.length;
           console.log('delete file id: '+response.data.status);

@@ -42,7 +42,7 @@ angular.module('ddtApp')
 .factory('AuthService', function ($http) {
     var authService = {};
     authService.login = function (credentials) {
-      return $http.post('http://localhost:5000/login', credentials)
+      return $http.post('/login', credentials)
         .then(function (response) {
           return response.data.user;
         });

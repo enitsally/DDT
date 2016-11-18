@@ -97,7 +97,7 @@ angular.module('ddtApp')
       for (var i = 0; i < $scope.newcreation.attach_list.length; i ++)
       {
         var attachId = $scope.newcreation.attach_list[i].file_id;
-        $http.post('http://localhost:5000/clearAllAttachFile', attachId).then(function(response){
+        $http.post('/clearAllAttachFile', attachId).then(function(response){
             console.log('delete file:'+ attachId + ', status: '+response.data.status);
         }, function (){
 
@@ -196,7 +196,7 @@ angular.module('ddtApp')
       }
 
       $mdDialog.show(confirm).then(function() {
-        $http.post('http://localhost:5000/deletePattern', criteria).then(function(response){
+        $http.post('/deletePattern', criteria).then(function(response){
             $mdDialog.show(
               $mdDialog.alert()
                 .parent(angular.element(document.querySelector('#popupContainer')))
@@ -220,7 +220,7 @@ angular.module('ddtApp')
     };
 
     $scope.testPattern = function(id){
-      $http.post('http://localhost:5000/testSQLPattern', id).then(function(response){
+      $http.post('/testSQLPattern', id).then(function(response){
           $mdDialog.show(
             $mdDialog.alert()
               .parent(angular.element(document.querySelector('#popupContainer')))
@@ -237,7 +237,7 @@ angular.module('ddtApp')
     }
 
     $scope.doTestPatternDraft = function(){
-      $http.post('http://localhost:5000/testSQLPatternDraft', $scope.newcreation).then(function(response){
+      $http.post('/testSQLPatternDraft', $scope.newcreation).then(function(response){
           $mdDialog.show(
             $mdDialog.alert()
               .parent(angular.element(document.querySelector('#popupContainer')))
@@ -409,14 +409,14 @@ angular.module('ddtApp')
     };
 
     $scope.patternUploader = new FileUploader({
-      url: 'http://localhost:5000/checkPatternTextFile',
+      url: '/checkPatternTextFile',
       autoUpload : true,
       removeAfterUpload : true,
       queueLimit: 1
     });
 
     $scope.attachmentUploader = new FileUploader({
-      url:'http://localhost:5000/checkPatternAttachedFile',
+      url:'/checkPatternAttachedFile',
       queueLimit: 20
     });
 
@@ -451,7 +451,7 @@ angular.module('ddtApp')
         var attachId = $scope.newcreation.attach_list[i].file_id;
         if (item.formData[1].objectId === attachId)
         {
-          $http.post('http://localhost:5000/clearAllAttachFile', attachId).then(function(response){
+          $http.post('/clearAllAttachFile', attachId).then(function(response){
               console.log('delete file:'+ attachId + ', status: '+response.data.status);
           }, function (){
 
@@ -466,7 +466,7 @@ angular.module('ddtApp')
     };
 
 
-    $http.get('http://localhost:5000/getPatternType').then(function (response){
+    $http.get('/getPatternType').then(function (response){
       $scope.pattern_type = response.data.status;
     }, function(){
 
@@ -482,7 +482,7 @@ angular.module('ddtApp')
         start_date: $scope.search.start_date,
         end_date: $scope.search.end_date
       };
-      $http.post('http://localhost:5000/getPatternSummary', criteria).then(function(response){
+      $http.post('/getPatternSummary', criteria).then(function(response){
           $scope.patternInfo = response.data.status;
       }, function (){
 
@@ -490,7 +490,7 @@ angular.module('ddtApp')
     };
 
     $scope.doSearchPattern = function(){
-      $http.post('http://localhost:5000/getSearchedPatternSummary', $scope.search).then(function(response){
+      $http.post('/getSearchedPatternSummary', $scope.search).then(function(response){
           $scope.patternInfo = response.data.status;
           console.log($scope.patternInfo);
       }, function (){
@@ -517,13 +517,13 @@ angular.module('ddtApp')
        );
     };
 
-    $http.get('http://localhost:5000/getConnectionFull').then(function (response){
+    $http.get('/getConnectionFull').then(function (response){
       $scope.conn_keys_respo = response.data.status;
     }, function(){
 
     });
 
-    $http.get('http://localhost:5000/getSystemUser').then(function (response){
+    $http.get('/getSystemUser').then(function (response){
       $scope.user_respo = response.data.status;
     }, function(){
 
@@ -531,7 +531,7 @@ angular.module('ddtApp')
 
 
     $scope.doSavePattern = function(){
-      $http.post('http://localhost:5000/saveQueryPattern', $scope.newcreation).then(function(response){
+      $http.post('/saveQueryPattern', $scope.newcreation).then(function(response){
 
         var pattern_id = response.data.status;
         var message = "Save Pattern Failed!"
